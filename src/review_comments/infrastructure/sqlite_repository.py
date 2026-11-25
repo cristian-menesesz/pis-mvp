@@ -1,12 +1,18 @@
 import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 from review_comments.domain.geometry import BoundingBox
 from review_comments.domain.models import Comment, ItemVersion, NewComment, Round, RoundStatus
 from review_comments.infrastructure.schema import SCHEMA
+
+
+def to_db_time(moment: datetime) -> str:
+    """Fixed-width UTC text, so comparing stored timestamps as strings in SQL
+    gives the same order as comparing the moments themselves."""
+    return moment.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.%f+00:00")
 
 
 class SqliteCommentRepository:
@@ -82,7 +88,7 @@ class SqliteCommentRepository:
                     comment.region.height,
                     comment.text,
                     comment.reviewer_name,
-                    comment.created_at.isoformat(),
+                    to_db_time(comment.created_at),
                     comment.round_id,
                 ),
             )
@@ -104,9 +110,21 @@ class SqliteCommentRepository:
     def close_round(self, round_id: str, closed_at: datetime) -> Round | None:
         with self.connect() as conn:
             # Only an open round changes; repeating the call keeps the first closed_at.
+            # The clock was read before this write was serialized, so a comment
+            # committed in between may carry a later timestamp. closed_at takes
+            # the later of both, keeping every accepted comment at or before the
+            # close in the stored history (DEF-02). One statement: no comment can
+            # be inserted between reading max(created_at) and closing.
             conn.execute(
-                "UPDATE rounds SET status = 'closed', closed_at = ? WHERE id = ? AND status = 'open'",
-                (closed_at.isoformat(), round_id),
+                """
+                UPDATE rounds
+                SET status = 'closed',
+                    closed_at = max(:closed_at,
+                                    coalesce((SELECT max(created_at) FROM comments
+                                              WHERE round_id = :round_id), :closed_at))
+                WHERE id = :round_id AND status = 'open'
+                """,
+                {"closed_at": to_db_time(closed_at), "round_id": round_id},
             )
             row = conn.execute(
                 "SELECT id, status, closed_at FROM rounds WHERE id = ?", (round_id,)

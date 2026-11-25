@@ -11,7 +11,7 @@ POSTER = "item-poster"
 POSTER_V1 = "poster-v1"  # 1200 x 800
 BROCHURE = "item-brochure"
 BROCHURE_V1 = "brochure-v1"  # 600 x 900
-CLOSED_AT = "2026-11-20T18:00:00+00:00"
+CLOSED_AT = "2026-11-20T18:00:00.000000+00:00"
 
 
 def insert_round(conn: sqlite3.Connection, round_id: str, closed_at: str | None = None) -> None:
@@ -51,7 +51,7 @@ def seed_demo_data(repository: SqliteCommentRepository) -> None:
             INSERT INTO comments (round_id, item_id, version_id, box_x, box_y, box_width,
                                   box_height, text, reviewer_name, created_at)
             VALUES (?, ?, ?, 40, 60, 200, 120, 'Make the logo bigger', 'Ana (fictitious)',
-                    '2026-11-20T17:30:00+00:00')
+                    '2026-11-20T17:30:00.000000+00:00')
             """,
             (CLOSED_ROUND, POSTER, POSTER_V1),
         )

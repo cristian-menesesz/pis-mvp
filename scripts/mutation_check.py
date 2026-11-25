@@ -61,8 +61,8 @@ MUTATIONS = [
         "M5",
         "RF-03 closing again overwrites closed_at",
         PKG / "infrastructure" / "sqlite_repository.py",
-        "WHERE id = ? AND status = 'open'\",",
-        "WHERE id = ?\",",
+        "WHERE id = :round_id AND status = 'open'",
+        "WHERE id = :round_id",
     ),
     Mutation(
         "M6",
@@ -77,6 +77,13 @@ MUTATIONS = [
         PKG / "application" / "service.py",
         "                text=command.text,\n",
         "                text=command.text.strip(),\n",
+    ),
+    Mutation(
+        "M8",
+        "DEF-02 fix: closed_at taken from the clock only",
+        PKG / "infrastructure" / "sqlite_repository.py",
+        "closed_at = max(:closed_at,",
+        "closed_at = coalesce(:closed_at,",
     ),
 ]
 
