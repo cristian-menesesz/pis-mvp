@@ -1,0 +1,12 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-9.2.0, pluggy-1.7.0 -- D:\projects\pis-mvp\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\projects\pis-mvp
+configfile: pyproject.toml
+plugins: anyio-4.16.0, cov-7.1.0
+collecting ... collected 4 items / 2 deselected / 2 selected
+
+tests/integration/test_comment_flow.py::test_i03_every_422_uses_the_same_error_contract[rejected-by-domain] PASSED [ 50%]
+tests/integration/test_comment_flow.py::test_i03_every_422_uses_the_same_error_contract[rejected-by-request-schema] PASSED [100%]
+
+======================= 2 passed, 2 deselected in 0.23s =======================

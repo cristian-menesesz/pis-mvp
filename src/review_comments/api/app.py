@@ -10,6 +10,7 @@ import os
 from datetime import datetime
 
 from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
@@ -105,6 +106,17 @@ def create_app(service: CommentService | None = None) -> FastAPI:
                     status_code=http_status, content={"error": code, "detail": str(exc)}
                 )
         return JSONResponse(status_code=500, content={"error": "domain_error", "detail": str(exc)})
+
+    @app.exception_handler(RequestValidationError)
+    async def _request_error(_: Request, exc: RequestValidationError) -> JSONResponse:
+        # Same body shape as domain 422s, so clients handle one contract (DEF-01).
+        problems = "; ".join(
+            f"{'.'.join(str(part) for part in err['loc'])}: {err['msg']}" for err in exc.errors()
+        )
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            content={"error": "invalid_comment", "detail": problems},
+        )
 
     @app.post(
         "/rounds/{round_id}/comments",
