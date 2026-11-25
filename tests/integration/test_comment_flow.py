@@ -48,6 +48,7 @@ def test_i01_valid_comment_is_persisted_and_recoverable(client, db_path):
     # Exactly one new row, and the read endpoint returns the same record.
     after = comment_rows(SqliteCommentRepository(db_path))
     assert len(after) == len(before) + 1
+    assert after[:-1] == before  # earlier rows untouched
     assert client.get(f"/comments/{created['id']}").json() == created
 
 
@@ -100,3 +101,83 @@ def test_i02_comment_on_closed_round_is_rejected_and_existing_data_is_intact(cli
     assert response.json()["error"] == "round_closed"
     assert comment_rows(repository) == comments_before
     assert repository.get_round(seed.CLOSED_ROUND) == round_before
+
+
+def test_i04_reviewer_words_survive_every_layer_unchanged(client, db_path):
+    """RF-01: the original words are never rewritten (HTTP, model, SQLite, read back)."""
+    text = "  el logo, más grande!!  \n"
+    name = "  Luis (fictitious) "
+
+    response = client.post(
+        f"/rounds/{seed.OPEN_ROUND}/comments",
+        json={
+            "item_id": seed.POSTER,
+            "version_id": seed.POSTER_V1,
+            "stroke": [{"x": 10, "y": 10}],
+            "text": text,
+            "reviewer_name": name,
+        },
+    )
+
+    assert response.status_code == 201
+    created = response.json()
+    assert (created["text"], created["reviewer_name"]) == (text, name)
+    fetched = client.get(f"/comments/{created['id']}").json()
+    assert (fetched["text"], fetched["reviewer_name"]) == (text, name)
+    raw = comment_rows(SqliteCommentRepository(db_path))[-1]
+    assert (raw["text"], raw["reviewer_name"]) == (text, name)
+
+
+VALID = {
+    "item_id": seed.POSTER,
+    "version_id": seed.POSTER_V1,
+    "stroke": [{"x": 10, "y": 10}, {"x": 40, "y": 30}],
+    "text": "ok",
+    "reviewer_name": "Luis (fictitious)",
+}
+
+
+@pytest.mark.parametrize(
+    ("round_id", "changes", "status", "error"),
+    [
+        pytest.param(seed.OPEN_ROUND, {"stroke": []}, 422, "invalid_comment", id="empty-stroke"),
+        pytest.param(
+            seed.OPEN_ROUND,
+            {"stroke": [{"x": -50, "y": 10}, {"x": -1, "y": 20}]},
+            422,
+            "invalid_comment",
+            id="stroke-fully-outside",
+        ),
+        pytest.param(
+            seed.OPEN_ROUND,
+            {"version_id": seed.BROCHURE_V1},
+            422,
+            "invalid_comment",
+            id="version-of-other-item",
+        ),
+        pytest.param(
+            seed.OPEN_ROUND, {"reviewer_name": " "}, 422, "invalid_comment", id="blank-reviewer"
+        ),
+        pytest.param("round-missing", {}, 404, "not_found", id="unknown-round"),
+        pytest.param(
+            seed.OPEN_ROUND, {"version_id": "v-missing"}, 404, "not_found", id="unknown-version"
+        ),
+    ],
+)
+def test_i05_rejections_map_to_contract_and_store_nothing(
+    client, db_path, round_id, changes, status, error
+):
+    before = comment_rows(SqliteCommentRepository(db_path))
+
+    response = client.post(f"/rounds/{round_id}/comments", json={**VALID, **changes})
+
+    assert response.status_code == status
+    assert response.json()["error"] == error
+    assert comment_rows(SqliteCommentRepository(db_path)) == before
+
+
+def test_i06_unknown_comment_and_round_are_not_found(client):
+    assert client.get("/comments/999999").status_code == 404
+    response = client.post("/rounds/round-missing/close")
+    assert response.status_code == 404
+    assert response.json()["error"] == "not_found"

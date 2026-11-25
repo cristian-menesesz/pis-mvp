@@ -31,6 +31,7 @@ markers = [
     "unit: isolated component, dependencies replaced by in-memory fakes",
     "integration: real boundary between API, service and SQLite",
     "failure: failure or repetition scenario with its own evidence",
+    "contract: same repository contract checked on the fake and on SQLite",
 ]
 
 [tool.coverage.run]

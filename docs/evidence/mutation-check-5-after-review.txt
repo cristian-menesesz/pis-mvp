@@ -1,0 +1,56 @@
+   Building review-comments @ file:///D:/projects/pis-mvp
+      Built review-comments @ file:///D:/projects/pis-mvp
+Uninstalled 1 package in 1ms
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 1 package in 12ms
+M1  KILLED   RF-02 atomic guard: insert without checking the round is still open
+      failed: tests/contract/test_repository_contract.py::test_c01_add_on_closed_round_returns_none_and_stores_nothing[sqlite]
+      failed: tests/failure/test_failure_scenarios.py::test_f02_round_closed_during_submission_stores_no_comment
+M2  KILLED   RF-02 service pre-check removed (storage guard still in place)
+      failed: tests/unit/test_add_comment.py::test_u02b_closed_round_is_reported_before_input_problems
+M3  KILLED   RF-01 region not clipped to the item
+      failed: tests/integration/test_comment_flow.py::test_i01_valid_comment_is_persisted_and_recoverable
+      failed: tests/unit/test_add_comment.py::test_u03b_stroke_crossing_item_edges_is_clipped_to_item
+      failed: tests/unit/test_add_comment.py::test_u03c_stroke_touching_item_border_is_accepted_on_the_border[right]
+      failed: tests/unit/test_add_comment.py::test_u03c_stroke_touching_item_border_is_accepted_on_the_border[left]
+      failed: tests/unit/test_add_comment.py::test_u03c_stroke_touching_item_border_is_accepted_on_the_border[top]
+      failed: tests/unit/test_add_comment.py::test_u03c_stroke_touching_item_border_is_accepted_on_the_border[bottom]
+M4  KILLED   RF-01 bounding box off by one pixel
+      failed: tests/integration/test_comment_flow.py::test_i05_rejections_map_to_contract_and_store_nothing[stroke-fully-outside]
+      failed: tests/unit/test_add_comment.py::test_u01_valid_stroke_stores_comment_with_minimal_bounding_box
+      failed: tests/unit/test_add_comment.py::test_u03a_single_point_stroke_gives_zero_size_box_at_that_point
+      failed: tests/unit/test_add_comment.py::test_u03c_stroke_touching_item_border_is_accepted_on_the_border[right]
+      failed: tests/unit/test_add_comment.py::test_u03c_stroke_touching_item_border_is_accepted_on_the_border[left]
+      failed: tests/unit/test_add_comment.py::test_u03c_stroke_touching_item_border_is_accepted_on_the_border[top]
+      failed: tests/unit/test_add_comment.py::test_u03c_stroke_touching_item_border_is_accepted_on_the_border[bottom]
+      failed: tests/unit/test_add_comment.py::test_u03c_stroke_touching_item_border_is_accepted_on_the_border[fractional-inside]
+      failed: tests/unit/test_add_comment.py::test_u03d_invalid_input_is_rejected_and_nothing_is_stored[fully-left]
+      failed: tests/unit/test_add_comment.py::test_u03d_invalid_input_is_rejected_and_nothing_is_stored[fully-above]
+M5  KILLED   RF-03 closing again overwrites closed_at
+      failed: tests/contract/test_repository_contract.py::test_c03_close_is_idempotent_on_a_round_with_comments[sqlite]
+      failed: tests/failure/test_failure_scenarios.py::test_f01_repeated_close_does_not_change_the_closed_round
+M6  KILLED   RF-01 blank text accepted
+      failed: tests/integration/test_comment_flow.py::test_i03_every_422_uses_the_same_error_contract[rejected-by-domain]
+      failed: tests/unit/test_add_comment.py::test_u03d_invalid_input_is_rejected_and_nothing_is_stored[blank-text]
+M7  KILLED   RF-01 reviewer's words rewritten (stripped) before storing
+      failed: tests/integration/test_comment_flow.py::test_i04_reviewer_words_survive_every_layer_unchanged
+      failed: tests/unit/test_add_comment.py::test_u04_reviewer_text_is_stored_exactly_as_written
+M8  KILLED   DEF-02 fix: closed_at taken from the clock only
+      failed: tests/contract/test_repository_contract.py::test_c04_closed_at_is_never_before_the_latest_accepted_comment[sqlite]
+      failed: tests/failure/test_failure_scenarios.py::test_f04_closing_time_is_never_earlier_than_an_accepted_comment
+M9  KILLED   RF-01 stroke fully left of the item accepted (check removed)
+      failed: tests/integration/test_comment_flow.py::test_i05_rejections_map_to_contract_and_store_nothing[stroke-fully-outside]
+      failed: tests/unit/test_add_comment.py::test_u03d_invalid_input_is_rejected_and_nothing_is_stored[fully-left]
+M10  KILLED   RF-01 storage rewrites the reviewer's words (strip on insert)
+      failed: tests/contract/test_repository_contract.py::test_c02_stored_comment_round_trips_unchanged[sqlite]
+      failed: tests/integration/test_comment_flow.py::test_i04_reviewer_words_survive_every_layer_unchanged
+M11  KILLED   RF-01 HTTP maps invalid input to 500 instead of 422
+      failed: tests/integration/test_comment_flow.py::test_i03_every_422_uses_the_same_error_contract[rejected-by-domain]
+      failed: tests/integration/test_comment_flow.py::test_i05_rejections_map_to_contract_and_store_nothing[empty-stroke]
+      failed: tests/integration/test_comment_flow.py::test_i05_rejections_map_to_contract_and_store_nothing[stroke-fully-outside]
+      failed: tests/integration/test_comment_flow.py::test_i05_rejections_map_to_contract_and_store_nothing[version-of-other-item]
+      failed: tests/integration/test_comment_flow.py::test_i05_rejections_map_to_contract_and_store_nothing[blank-reviewer]
+
+11/11 mutations killed

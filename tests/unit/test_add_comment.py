@@ -65,7 +65,10 @@ def test_u01_valid_stroke_stores_comment_with_minimal_bounding_box(service, repo
     assert comment.text == "Make the title bigger"
     assert comment.reviewer_name == "Luis (fictitious)"
     assert comment.created_at == NOW
-    assert repo.comments == [comment]
+    # The fake stores and returns the same object, so the field checks above
+    # are checks on what was stored; here: exactly one record, under its id.
+    assert len(repo.comments) == 1
+    assert repo.get_comment(comment.id) == comment
 
 
 def test_u02_closed_round_rejects_comment_and_stores_nothing(service, repo):
@@ -100,10 +103,24 @@ def test_u03b_stroke_crossing_item_edges_is_clipped_to_item(service):
     assert comment.region == BoundingBox(x=0, y=700, width=1200, height=100)
 
 
-def test_u03c_stroke_touching_item_border_is_accepted_on_the_border(service):
-    comment = service.add_comment(command(stroke=[Point(1200, 0), Point(1250, 40)]))
+@pytest.mark.parametrize(
+    ("stroke", "expected"),
+    [
+        pytest.param([Point(1200, 0), Point(1250, 40)], BoundingBox(1200, 0, 0, 40), id="right"),
+        pytest.param([Point(-30, 100), Point(0, 200)], BoundingBox(0, 100, 0, 100), id="left"),
+        pytest.param([Point(100, -20), Point(200, 0)], BoundingBox(100, 0, 100, 0), id="top"),
+        pytest.param([Point(100, 800), Point(200, 850)], BoundingBox(100, 800, 100, 0), id="bottom"),
+        pytest.param(
+            [Point(10.25, 20.5), Point(30.75, 40.125)],
+            BoundingBox(10.25, 20.5, 20.5, 19.625),
+            id="fractional-inside",
+        ),
+    ],
+)
+def test_u03c_stroke_touching_item_border_is_accepted_on_the_border(service, stroke, expected):
+    comment = service.add_comment(command(stroke=stroke))
 
-    assert comment.region == BoundingBox(x=1200, y=0, width=0, height=40)
+    assert comment.region == expected
 
 
 @pytest.mark.parametrize(
@@ -111,9 +128,18 @@ def test_u03c_stroke_touching_item_border_is_accepted_on_the_border(service):
     [
         pytest.param({"stroke": []}, EmptyStrokeError, id="empty-stroke"),
         pytest.param(
-            {"stroke": [Point(1201, 10), Point(1500, 90)]},
+            {"stroke": [Point(1200.01, 10), Point(1500, 90)]},
             RegionOutsideItemError,
-            id="stroke-fully-outside",
+            id="fully-right",
+        ),
+        pytest.param(
+            {"stroke": [Point(-50, 10), Point(-0.01, 90)]}, RegionOutsideItemError, id="fully-left"
+        ),
+        pytest.param(
+            {"stroke": [Point(10, -90), Point(50, -0.01)]}, RegionOutsideItemError, id="fully-above"
+        ),
+        pytest.param(
+            {"stroke": [Point(10, 800.01), Point(50, 900)]}, RegionOutsideItemError, id="fully-below"
         ),
         pytest.param(
             {"stroke": [Point(float("nan"), 10)]}, NonFiniteCoordinateError, id="nan-coordinate"

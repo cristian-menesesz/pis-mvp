@@ -85,6 +85,29 @@ MUTATIONS = [
         "closed_at = max(:closed_at,",
         "closed_at = coalesce(:closed_at,",
     ),
+    # M9-M11 come from the independent review (docs/evidence/peer-review.md):
+    # defects it predicted the suite would not have noticed.
+    Mutation(
+        "M9",
+        "RF-01 stroke fully left of the item accepted (check removed)",
+        PKG / "domain" / "geometry.py",
+        "if box.x > item_width or box.right < 0 or",
+        "if box.x > item_width or",
+    ),
+    Mutation(
+        "M10",
+        "RF-01 storage rewrites the reviewer's words (strip on insert)",
+        PKG / "infrastructure" / "sqlite_repository.py",
+        "                    comment.text,\n",
+        "                    comment.text.strip(),\n",
+    ),
+    Mutation(
+        "M11",
+        "RF-01 HTTP maps invalid input to 500 instead of 422",
+        PKG / "api" / "app.py",
+        '    (InvalidCommentError, status.HTTP_422_UNPROCESSABLE_CONTENT, "invalid_comment"),\n',
+        "",
+    ),
 ]
 
 

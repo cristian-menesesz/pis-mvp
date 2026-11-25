@@ -39,7 +39,11 @@ class InMemoryCommentRepository:
     def close_round(self, round_id: str, closed_at: datetime) -> Round | None:
         round_ = self.rounds.get(round_id)
         if round_ is not None and round_.is_open:
-            round_ = replace(round_, status=RoundStatus.CLOSED, closed_at=closed_at)
+            # Same rule as the real storage (DEF-02): never before an accepted comment.
+            latest = max(
+                (c.created_at for c in self.comments if c.round_id == round_id), default=closed_at
+            )
+            round_ = replace(round_, status=RoundStatus.CLOSED, closed_at=max(closed_at, latest))
             self.rounds[round_id] = round_
         return round_
 
