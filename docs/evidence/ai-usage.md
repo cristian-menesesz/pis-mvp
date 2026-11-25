@@ -44,6 +44,7 @@ Ningún resultado de este repositorio es una sugerencia sin ejecutar: cada estad
 | 6 | Concurrencia real | Sonda con hilos concurrentes | `scripts/concurrency_probe.py` | La primera métrica (marcas de tiempo) era engañosa (TOOL-01); se reemplazó por un trigger que registra el orden de confirmación. Al separarlas apareció DEF-02 | 20/20 corridas tras la corrección | `concurrency-probe-1..3` |
 | 7 | Revisión independiente | Agente revisor sin contexto de construcción | 5 observaciones sobre las pruebas | 4 aplicadas, 1 parcialmente (justificado) | Mutaciones M9–M11: 9/11 antes, 11/11 después | `peer-review.md` |
 | 8 | Dependencias | Advertencia de obsolescencia de `httpx` en el cliente de pruebas | La IA intentó instalar `httpx2`, el reemplazo que sugería el mensaje | **Rechazado** por el control de seguridad del entorno (paquete sugerido solo por un mensaje de advertencia); se mantuvo `httpx` y se filtró esa advertencia | Suite en verde sin la dependencia nueva | `pyproject.toml` |
+| 9 | Informe técnico | Redactar el complemento técnico y la entrega individual en LaTeX, en primera persona, a partir de la evidencia del repositorio | Borrador completo del informe (compilado con MiKTeX) | El estudiante revisa y ajusta el texto antes de entregarlo | Cada cifra del informe se tomó de las salidas guardadas en `docs/evidence/` | Informe (fuera del repositorio) |
 
 ## Verificación personal del estudiante (completar)
 
