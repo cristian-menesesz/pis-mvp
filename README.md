@@ -60,7 +60,7 @@ uv run pytest -v
 | Objetivo | Comando |
 |---|---|
 | Pruebas con cobertura | `uv run pytest -v --cov --cov-report=term-missing` |
-| Solo un nivel | `uv run pytest -m unit` · `-m integration` · `-m failure` |
+| Solo un nivel | `uv run pytest -m unit` · `-m integration` · `-m failure` · `-m contract` |
 | ¿Las pruebas fallan si se rompe la regla? | `uv run python scripts/mutation_check.py` |
 | Concurrencia real (hilos, corridas) | `uv run python scripts/concurrency_probe.py 40 20` |
 | Base de demostración | `uv run python scripts/seed.py review.db` |
@@ -70,7 +70,11 @@ uv run pytest -v
 en un directorio temporal de pytest, la siembra con `seed_demo_data` (datos ficticios:
 una ronda abierta, una cerrada con un comentario previo, dos ítems con su versión) y
 pytest la elimina al terminar. No hay estado compartido entre pruebas ni datos reales.
-La API usa `http://127.0.0.1:8000/docs` para explorar el contrato.
+Con la API levantada, `http://127.0.0.1:8000/docs` permite explorar el contrato.
+
+Cobertura de ramas: 98 %. Sin ejecutar quedan el arranque que lee `REVIEW_DB_PATH`
+(lo usa `uvicorn`, no las pruebas) y la respuesta 500 genérica para errores de dominio
+sin código asignado (hoy ninguno llega ahí).
 
 ## Pruebas
 
@@ -79,21 +83,25 @@ La API usa `http://127.0.0.1:8000/docs` para explorar el contrato.
 | U-01 | Unitaria | Trazo válido → caja mínima correcta y comentario guardado | RF-01 |
 | U-02 | Unitaria | Ronda cerrada → rechazo, nada guardado, ronda intacta | RF-02 |
 | U-02b | Unitaria | Ronda cerrada se informa antes que errores de entrada | RF-02 |
-| U-03a–d | Unitaria | Fronteras: un punto, recorte en bordes, borde exacto, entradas inválidas | RF-01 |
+| U-03a–d | Unitaria | Fronteras: un punto, recorte, los 4 bordes, coordenadas fraccionarias, fuera del ítem por cada lado, entradas inválidas | RF-01 |
 | U-04 | Unitaria | El texto se guarda sin reescribir | RF-01 |
 | U-05 | Unitaria | Escritura rechazada por cierre concurrente → `RoundClosedError`, nunca éxito ficticio | RF-02 |
 | U-06, U-07 | Unitaria | Cierre repetido conserva el primer `closed_at`; entidades inexistentes → no encontrado | RF-03 |
 | I-01 | Integración | API → servicio → SQLite: comentario persistido y recuperable con otra conexión | RF-01 |
 | I-02 | Integración | Ronda cerrada con datos previos: 409 y datos existentes idénticos | RF-02 |
 | I-03 | Integración | Todo 422 usa el mismo contrato de error (DEF-01) | RF-01 |
+| I-04 | Integración | Texto y nombre llegan intactos a SQLite y vuelven intactos | RF-01 |
+| I-05, I-06 | Integración | Cada rechazo y cada 404 atraviesa API → SQLite sin guardar nada | RF-01, RF-02 |
+| C-01–C-05 | Contrato | El doble en memoria y SQLite cumplen el mismo contrato de repositorio | RF-01–RF-03 |
 | F-01 | Fallo | Cierre repetido por la API no cambia la ronda ni los comentarios | RF-03 |
 | F-02 | Fallo | La ronda se cierra entre la comprobación y la escritura: no se guarda nada | RF-02 |
 | F-03 | Fallo | El esquema rechaza filas inválidas escritas sin pasar por el servicio | RF-01 |
 | F-04 | Fallo | `closed_at` nunca es anterior a un comentario aceptado (DEF-02) | RF-02 |
 
 **Si cambia una regla, revisar:** geometría o recorte → U-01, U-03a–c, I-01;
-campos obligatorios → U-03d, I-03, F-03; ronda abierta → U-02, U-02b, U-05, I-02,
-F-02, F-04; cierre → U-06, F-01, F-04. Después, `scripts/mutation_check.py` indica si
+campos obligatorios → U-03d, I-03, I-05, F-03; texto original → U-04, I-04, C-02;
+ronda abierta → U-02, U-02b, U-05, I-02, F-02, F-04, C-01; cierre → U-06, F-01, F-04,
+C-03, C-04. Después, `scripts/mutation_check.py` indica si
 alguna regla quedó sin prueba que la proteja.
 
 ## Evidencia (`docs/evidence/`)
