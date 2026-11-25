@@ -1,0 +1,22 @@
+run  1: status={409: 40} committed_after_close=0 stamped_after_close=0 201_vs_rows_mismatch=0 OK
+run  2: status={201: 3, 409: 37} committed_after_close=0 stamped_after_close=0 201_vs_rows_mismatch=0 OK
+run  3: status={201: 1, 409: 39} committed_after_close=0 stamped_after_close=0 201_vs_rows_mismatch=0 OK
+run  4: status={201: 1, 409: 39} committed_after_close=0 stamped_after_close=0 201_vs_rows_mismatch=0 OK
+run  5: status={201: 6, 409: 34} committed_after_close=0 stamped_after_close=3 201_vs_rows_mismatch=0 VIOLATION
+run  6: status={201: 6, 409: 34} committed_after_close=0 stamped_after_close=3 201_vs_rows_mismatch=0 VIOLATION
+run  7: status={201: 3, 409: 37} committed_after_close=0 stamped_after_close=1 201_vs_rows_mismatch=0 VIOLATION
+run  8: status={201: 36, 409: 4} committed_after_close=0 stamped_after_close=27 201_vs_rows_mismatch=0 VIOLATION
+run  9: status={201: 10, 409: 30} committed_after_close=0 stamped_after_close=7 201_vs_rows_mismatch=0 VIOLATION
+run 10: status={201: 2, 409: 38} committed_after_close=0 stamped_after_close=0 201_vs_rows_mismatch=0 OK
+run 11: status={201: 4, 409: 36} committed_after_close=0 stamped_after_close=2 201_vs_rows_mismatch=0 VIOLATION
+run 12: status={201: 1, 409: 39} committed_after_close=0 stamped_after_close=0 201_vs_rows_mismatch=0 OK
+run 13: status={201: 3, 409: 37} committed_after_close=0 stamped_after_close=0 201_vs_rows_mismatch=0 OK
+run 14: status={201: 1, 409: 39} committed_after_close=0 stamped_after_close=0 201_vs_rows_mismatch=0 OK
+run 15: status={201: 3, 409: 37} committed_after_close=0 stamped_after_close=1 201_vs_rows_mismatch=0 VIOLATION
+run 16: status={201: 5, 409: 35} committed_after_close=0 stamped_after_close=1 201_vs_rows_mismatch=0 VIOLATION
+run 17: status={201: 2, 409: 38} committed_after_close=0 stamped_after_close=0 201_vs_rows_mismatch=0 OK
+run 18: status={201: 1, 409: 39} committed_after_close=0 stamped_after_close=0 201_vs_rows_mismatch=0 OK
+run 19: status={201: 29, 409: 11} committed_after_close=0 stamped_after_close=25 201_vs_rows_mismatch=0 VIOLATION
+run 20: status={201: 27, 409: 13} committed_after_close=0 stamped_after_close=21 201_vs_rows_mismatch=0 VIOLATION
+
+10/20 runs kept the invariant (40 threads each)

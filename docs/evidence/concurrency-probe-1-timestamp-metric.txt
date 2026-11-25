@@ -1,0 +1,22 @@
+run  1: status={409: 40} stored_after_close=0 201_vs_rows_mismatch=0 OK
+run  2: status={201: 22, 409: 18} stored_after_close=17 201_vs_rows_mismatch=0 VIOLATION
+run  3: status={201: 2, 409: 38} stored_after_close=0 201_vs_rows_mismatch=0 OK
+run  4: status={201: 25, 409: 15} stored_after_close=21 201_vs_rows_mismatch=0 VIOLATION
+run  5: status={201: 5, 409: 35} stored_after_close=0 201_vs_rows_mismatch=0 OK
+run  6: status={201: 12, 409: 28} stored_after_close=2 201_vs_rows_mismatch=0 VIOLATION
+run  7: status={201: 27, 409: 13} stored_after_close=22 201_vs_rows_mismatch=0 VIOLATION
+run  8: status={201: 1, 409: 39} stored_after_close=0 201_vs_rows_mismatch=0 OK
+run  9: status={201: 1, 409: 39} stored_after_close=0 201_vs_rows_mismatch=0 OK
+run 10: status={201: 2, 409: 38} stored_after_close=0 201_vs_rows_mismatch=0 OK
+run 11: status={201: 17, 409: 23} stored_after_close=15 201_vs_rows_mismatch=0 VIOLATION
+run 12: status={201: 9, 409: 31} stored_after_close=8 201_vs_rows_mismatch=0 VIOLATION
+run 13: status={201: 3, 409: 37} stored_after_close=0 201_vs_rows_mismatch=0 OK
+run 14: status={201: 2, 409: 38} stored_after_close=0 201_vs_rows_mismatch=0 OK
+run 15: status={201: 9, 409: 31} stored_after_close=3 201_vs_rows_mismatch=0 VIOLATION
+run 16: status={201: 2, 409: 38} stored_after_close=0 201_vs_rows_mismatch=0 OK
+run 17: status={201: 1, 409: 39} stored_after_close=0 201_vs_rows_mismatch=0 OK
+run 18: status={201: 1, 409: 39} stored_after_close=0 201_vs_rows_mismatch=0 OK
+run 19: status={201: 39, 409: 1} stored_after_close=33 201_vs_rows_mismatch=0 VIOLATION
+run 20: status={201: 36, 409: 4} stored_after_close=36 201_vs_rows_mismatch=0 VIOLATION
+
+11/20 runs kept the invariant (40 threads each)

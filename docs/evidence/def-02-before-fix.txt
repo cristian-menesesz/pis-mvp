@@ -1,0 +1,41 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-9.2.0, pluggy-1.7.0
+rootdir: D:\projects\pis-mvp
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.16.0, cov-7.1.0
+collected 26 items / 25 deselected / 1 selected
+
+tests\failure\test_failure_scenarios.py F                                [100%]
+
+================================== FAILURES ===================================
+_______ test_f04_closing_time_is_never_earlier_than_an_accepted_comment _______
+
+sqlite_repo = <review_comments.infrastructure.sqlite_repository.SqliteCommentRepository object at 0x0000027459AE3770>
+
+    def test_f04_closing_time_is_never_earlier_than_an_accepted_comment(sqlite_repo):
+        """DEF-02: the close request reads its clock before its write is serialized,
+        so a comment committed in between can carry a later timestamp. The stored
+        history must still show every accepted comment at or before closed_at."""
+        comment_time = T0 + timedelta(seconds=1)
+        CommentService(sqlite_repo, clock=lambda: comment_time).add_comment(
+            AddCommentCommand(
+                round_id=seed.OPEN_ROUND,
+                item_id=seed.POSTER,
+                version_id=seed.POSTER_V1,
+                stroke=[Point(5, 5)],
+                text="Llegó justo antes del cierre",
+                reviewer_name="Luis (fictitious)",
+            )
+        )
+    
+        closed = CommentService(sqlite_repo, clock=lambda: T0).close_round(seed.OPEN_ROUND)
+    
+>       assert closed.closed_at >= comment_time
+E       AssertionError: assert datetime.datetime(2026, 11, 24, 12, 0, tzinfo=datetime.timezone.utc) >= datetime.datetime(2026, 11, 24, 12, 0, 1, tzinfo=datetime.timezone.utc)
+E        +  where datetime.datetime(2026, 11, 24, 12, 0, tzinfo=datetime.timezone.utc) = Round(id='round-open', status=<RoundStatus.CLOSED: 'closed'>, closed_at=datetime.datetime(2026, 11, 24, 12, 0, tzinfo=datetime.timezone.utc)).closed_at
+
+tests\failure\test_failure_scenarios.py:99: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/failure/test_failure_scenarios.py::test_f04_closing_time_is_never_earlier_than_an_accepted_comment
+====================== 1 failed, 25 deselected in 0.24s =======================

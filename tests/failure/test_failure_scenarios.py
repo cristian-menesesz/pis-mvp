@@ -78,6 +78,29 @@ def test_f02_round_closed_during_submission_stores_no_comment(sqlite_repo):
     assert sqlite_repo.get_round(seed.OPEN_ROUND).is_open is False
 
 
+def test_f04_closing_time_is_never_earlier_than_an_accepted_comment(sqlite_repo):
+    """DEF-02: the close request reads its clock before its write is serialized,
+    so a comment committed in between can carry a later timestamp. The stored
+    history must still show every accepted comment at or before closed_at."""
+    comment_time = T0 + timedelta(seconds=1)
+    CommentService(sqlite_repo, clock=lambda: comment_time).add_comment(
+        AddCommentCommand(
+            round_id=seed.OPEN_ROUND,
+            item_id=seed.POSTER,
+            version_id=seed.POSTER_V1,
+            stroke=[Point(5, 5)],
+            text="Llegó justo antes del cierre",
+            reviewer_name="Luis (fictitious)",
+        )
+    )
+
+    closed = CommentService(sqlite_repo, clock=lambda: T0).close_round(seed.OPEN_ROUND)
+
+    assert closed.closed_at >= comment_time
+    stored = SqliteCommentRepository(sqlite_repo._db_path).get_round(seed.OPEN_ROUND)
+    assert stored.closed_at == closed.closed_at
+
+
 @pytest.mark.parametrize(
     ("column", "value"),
     [
