@@ -1,0 +1,49 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-9.2.0, pluggy-1.7.0 -- D:\projects\pis-mvp\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\projects\pis-mvp
+configfile: pyproject.toml
+plugins: anyio-4.16.0, cov-7.1.0
+collecting ... collected 4 items / 2 deselected / 2 selected
+
+tests/integration/test_comment_flow.py::test_i03_every_422_uses_the_same_error_contract[rejected-by-domain] PASSED [ 50%]
+tests/integration/test_comment_flow.py::test_i03_every_422_uses_the_same_error_contract[rejected-by-request-schema] FAILED [100%]
+
+================================== FAILURES ===================================
+_ test_i03_every_422_uses_the_same_error_contract[rejected-by-request-schema] _
+
+client = <starlette.testclient.TestClient object at 0x000002896E2D8050>
+db_path = WindowsPath('C:/Users/LENOVO/AppData/Local/Temp/pytest-of-LENOVO/pytest-1/test_i03_every_422_uses_the_sa1/review.db')
+bad_field = {'text': None}
+
+    @pytest.mark.parametrize(
+        "bad_field",
+        [
+            pytest.param({"text": "   "}, id="rejected-by-domain"),
+            pytest.param({"text": None}, id="rejected-by-request-schema"),
+        ],
+    )
+    def test_i03_every_422_uses_the_same_error_contract(client, db_path, bad_field):
+        """DEF-01: a 422 must have one body shape whatever layer rejected it."""
+        before = comment_rows(SqliteCommentRepository(db_path))
+        payload = {
+            "item_id": seed.POSTER,
+            "version_id": seed.POSTER_V1,
+            "stroke": [{"x": 10, "y": 10}],
+            "text": "ok",
+            "reviewer_name": "Luis (fictitious)",
+            **bad_field,
+        }
+    
+        response = client.post(f"/rounds/{seed.OPEN_ROUND}/comments", json=payload)
+    
+        assert response.status_code == 422
+        body = response.json()
+>       assert body["error"] == "invalid_comment"
+               ^^^^^^^^^^^^^
+E       KeyError: 'error'
+
+tests\integration\test_comment_flow.py:77: KeyError
+=========================== short test summary info ===========================
+FAILED tests/integration/test_comment_flow.py::test_i03_every_422_uses_the_same_error_contract[rejected-by-request-schema]
+================== 1 failed, 1 passed, 2 deselected in 0.40s ==================

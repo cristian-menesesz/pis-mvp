@@ -23,6 +23,10 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
+filterwarnings = [
+    # starlette deprecates httpx in its TestClient; the suggested replacement is not adopted yet.
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated",
+]
 markers = [
     "unit: isolated component, dependencies replaced by in-memory fakes",
     "integration: real boundary between API, service and SQLite",
