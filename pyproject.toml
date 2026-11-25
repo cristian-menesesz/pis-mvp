@@ -1,0 +1,37 @@
+[project]
+name = "review-comments"
+version = "0.1.0"
+description = "Region-anchored review comments: a reviewer's stroke becomes a bounding box stored with its round, item and version."
+authors = [{ name = "Cristian Meneses" }]
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.7,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.2.0",
+    "pytest-cov>=7.1.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "unit: isolated component, dependencies replaced by in-memory fakes",
+    "integration: real boundary between API, service and SQLite",
+    "failure: failure or repetition scenario with its own evidence",
+]
+
+[tool.coverage.run]
+source = ["review_comments"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
