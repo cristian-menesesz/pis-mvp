@@ -1,0 +1,62 @@
+commit: ff48ec9b930c782735491a680f2397e2b2ed5b0d
+date: 2026-11-25T01:55:00Z
+command: uv run pytest -v --cov --cov-report=term-missing
+
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-9.2.0, pluggy-1.7.0 -- D:\projects\pis-mvp\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\projects\pis-mvp
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.16.0, cov-7.1.0
+collecting ... collected 26 items
+
+tests/failure/test_failure_scenarios.py::test_f01_repeated_close_does_not_change_the_closed_round PASSED [  3%]
+tests/failure/test_failure_scenarios.py::test_f02_round_closed_during_submission_stores_no_comment PASSED [  7%]
+tests/failure/test_failure_scenarios.py::test_f04_closing_time_is_never_earlier_than_an_accepted_comment PASSED [ 11%]
+tests/failure/test_failure_scenarios.py::test_f03_storage_rejects_invalid_rows_written_around_the_service[blank-text] PASSED [ 15%]
+tests/failure/test_failure_scenarios.py::test_f03_storage_rejects_invalid_rows_written_around_the_service[version-of-other-item] PASSED [ 19%]
+tests/failure/test_failure_scenarios.py::test_f03_storage_rejects_invalid_rows_written_around_the_service[negative-width] PASSED [ 23%]
+tests/integration/test_comment_flow.py::test_i01_valid_comment_is_persisted_and_recoverable PASSED [ 26%]
+tests/integration/test_comment_flow.py::test_i03_every_422_uses_the_same_error_contract[rejected-by-domain] PASSED [ 30%]
+tests/integration/test_comment_flow.py::test_i03_every_422_uses_the_same_error_contract[rejected-by-request-schema] PASSED [ 34%]
+tests/integration/test_comment_flow.py::test_i02_comment_on_closed_round_is_rejected_and_existing_data_is_intact PASSED [ 38%]
+tests/unit/test_add_comment.py::test_u01_valid_stroke_stores_comment_with_minimal_bounding_box PASSED [ 42%]
+tests/unit/test_add_comment.py::test_u02_closed_round_rejects_comment_and_stores_nothing PASSED [ 46%]
+tests/unit/test_add_comment.py::test_u02b_closed_round_is_reported_before_input_problems PASSED [ 50%]
+tests/unit/test_add_comment.py::test_u03a_single_point_stroke_gives_zero_size_box_at_that_point PASSED [ 53%]
+tests/unit/test_add_comment.py::test_u03b_stroke_crossing_item_edges_is_clipped_to_item PASSED [ 57%]
+tests/unit/test_add_comment.py::test_u03c_stroke_touching_item_border_is_accepted_on_the_border PASSED [ 61%]
+tests/unit/test_add_comment.py::test_u03d_invalid_input_is_rejected_and_nothing_is_stored[empty-stroke] PASSED [ 65%]
+tests/unit/test_add_comment.py::test_u03d_invalid_input_is_rejected_and_nothing_is_stored[stroke-fully-outside] PASSED [ 69%]
+tests/unit/test_add_comment.py::test_u03d_invalid_input_is_rejected_and_nothing_is_stored[nan-coordinate] PASSED [ 73%]
+tests/unit/test_add_comment.py::test_u03d_invalid_input_is_rejected_and_nothing_is_stored[blank-text] PASSED [ 76%]
+tests/unit/test_add_comment.py::test_u03d_invalid_input_is_rejected_and_nothing_is_stored[blank-reviewer] PASSED [ 80%]
+tests/unit/test_add_comment.py::test_u03d_invalid_input_is_rejected_and_nothing_is_stored[version-of-other-item] PASSED [ 84%]
+tests/unit/test_add_comment.py::test_u04_reviewer_text_is_stored_exactly_as_written PASSED [ 88%]
+tests/unit/test_add_comment.py::test_u05_round_closed_between_check_and_write_is_reported_as_closed PASSED [ 92%]
+tests/unit/test_close_round.py::test_u06_closing_twice_keeps_first_closing_time PASSED [ 96%]
+tests/unit/test_close_round.py::test_u07_unknown_round_or_comment_is_not_found PASSED [100%]
+
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.13.5-final-0 _______________
+
+Name                                                      Stmts   Miss Branch BrPart  Cover   Missing
+-----------------------------------------------------------------------------------------------------
+src\review_comments\__init__.py                               0      0      0      0   100%
+src\review_comments\api\__init__.py                           0      0      0      0   100%
+src\review_comments\api\app.py                               73      4      6      2    92%   95-97, 108
+src\review_comments\application\__init__.py                   0      0      0      0   100%
+src\review_comments\application\ports.py                      6      0      0      0   100%
+src\review_comments\application\service.py                   52      2     18      2    94%   43, 49
+src\review_comments\domain\__init__.py                        0      0      0      0   100%
+src\review_comments\domain\errors.py                         27      0      0      0   100%
+src\review_comments\domain\geometry.py                       39      0      6      0   100%
+src\review_comments\domain\models.py                         40      0      0      0   100%
+src\review_comments\infrastructure\__init__.py                0      0      0      0   100%
+src\review_comments\infrastructure\schema.py                  1      0      0      0   100%
+src\review_comments\infrastructure\seed.py                   23      0      0      0   100%
+src\review_comments\infrastructure\sqlite_repository.py      57      1      4      1    97%   59
+-----------------------------------------------------------------------------------------------------
+TOTAL                                                       318      7     34      5    97%
+============================= 26 passed in 1.03s ==============================
