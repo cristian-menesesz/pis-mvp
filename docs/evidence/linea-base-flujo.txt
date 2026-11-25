@@ -1,0 +1,9 @@
+revision: 008114cf117f1d06a103e8d241901d1ad693596f (linea base)
+date: 2026-11-25T02:10:39Z
+
+POST ronda abierta  -> 201 {'id': 2, 'round_id': 'round-open', 'item_id': 'item-poster', 'version_id': 'poster-v1', 'region': {'x': 100.0, 'y': 0.0, 'width': 1100.0, 'height': 300.0}, 'text': 'Mueve el titulo', 'reviewer_name': 'Luis (ficticio)', 'created_at': '2026-11-25T02:10:41.388789Z'}
+GET comentario      -> 200
+POST ronda cerrada  -> 409 {'error': 'round_closed', 'detail': "round 'round-closed' is closed; no comments are accepted"}
+POST cerrar ronda   -> {'id': 'round-open', 'status': 'closed', 'closed_at': '2026-11-25T02:10:41.416689Z'}
+POST cerrar de nuevo-> {'id': 'round-open', 'status': 'closed', 'closed_at': '2026-11-25T02:10:41.416689Z'}
+pruebas automatizadas en esta revision: ninguna

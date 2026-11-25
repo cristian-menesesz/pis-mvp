@@ -109,6 +109,7 @@ alguna regla quedó sin prueba que la proteja.
 | Archivo | Contenido |
 |---|---|
 | `test-run.txt` | Ejecución completa con cobertura, commit y fecha. |
+| `linea-base-flujo.txt` | Flujo de punta a punta sobre la línea base (commit `008114c`), antes de las pruebas. |
 | `defects.md` | Defectos (DEF-01, DEF-02), defectos de herramientas y limitaciones. |
 | `def-0X-before-fix.txt` / `def-0X-after-fix.txt` | Misma prueba antes y después de cada corrección. |
 | `mutation-check-*.txt` | Mutaciones detectadas por las pruebas, en orden cronológico. |
