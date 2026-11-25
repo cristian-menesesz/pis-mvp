@@ -76,6 +76,15 @@ def test_u02_closed_round_rejects_comment_and_stores_nothing(service, repo):
     assert repo.rounds[CLOSED.id] == CLOSED
 
 
+def test_u02b_closed_round_is_reported_before_input_problems(service, repo):
+    """A closed round is the reason to report: fixing the input would not help.
+    Added after mutation M2 survived (no test pinned this precedence)."""
+    with pytest.raises(RoundClosedError):
+        service.add_comment(command(round_id=CLOSED.id, text="   ", stroke=[]))
+
+    assert repo.comments == []
+
+
 # U-03: boundaries of the region rule and of the required input.
 
 
