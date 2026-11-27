@@ -1,0 +1,16 @@
+date: 2026-11-27T14:03:27+00:00
+commit: b2346b1e76b2b9dc1dc8f79cadd35113613f0123
+
+## qwen3.5:4b
+seed=1 valid_tool_call=True calls=["get_weather({'city': 'La Paz'})"] latency_s=18.8
+seed=2 valid_tool_call=True calls=["get_weather({'city': 'La Paz'})"] latency_s=3.0
+seed=3 valid_tool_call=True calls=["get_weather({'city': 'La Paz'})"] latency_s=3.6
+
+## llama3.2
+seed=1 valid_tool_call=True calls=["get_weather({'city': 'La Paz'})"] latency_s=7.9
+seed=2 valid_tool_call=True calls=["get_weather({'city': 'La Paz'})"] latency_s=0.6
+seed=3 valid_tool_call=True calls=["get_weather({'city': 'La Paz'})"] latency_s=0.7
+
+## nomic-embed-text
+embedding_dim=768 latency_s=1.0
+Decision: keep qwen3.5:4b (3/3 valid tool calls; first call includes model load).

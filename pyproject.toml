@@ -14,6 +14,11 @@ requires = ["uv_build>=0.11.7,<0.12.0"]
 build-backend = "uv_build"
 
 [dependency-groups]
+assistant = [
+    "mcp>=2.3",
+    "numpy>=2.5",
+    "ollama>=0.6.3",
+]
 dev = [
     "httpx>=0.28.1",
     "pytest>=9.2.0",
@@ -32,10 +37,11 @@ markers = [
     "integration: real boundary between API, service and SQLite",
     "failure: failure or repetition scenario with its own evidence",
     "contract: same repository contract checked on the fake and on SQLite",
+    "assistant: evidence-anchor assistant, deterministic (no LLM calls)",
 ]
 
 [tool.coverage.run]
-source = ["review_comments"]
+source = ["review_comments", "evidence_anchor"]
 branch = true
 
 [tool.coverage.report]
