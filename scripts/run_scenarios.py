@@ -77,8 +77,10 @@ def current_passed(run: Run) -> bool:
 
 
 CODE_LIMITS = ("El modelo no declaró límites", "Fallos de herramientas en esta ejecución")
-FAILURE_WORDS = ("not_found", "no existe", "no encontr", "no está registrada", "no registrada", "server_unavailable",
-                 "conexión", "no disponible", "fallo", "falló", "error")
+# What "the model named the failure" means, per case (TOOL-A02: a generic keyword list
+# missed "no se encontró … U-99" and would also have matched unrelated text).
+MISSING_TEST_WORDS = ("U-99",)
+OUTAGE_WORDS = ("conexión", "servidor", "server_unavailable", "fallo técnico", "no disponible", "herramienta")
 
 
 def model_limits(run: Run) -> list[str]:
@@ -86,8 +88,8 @@ def model_limits(run: Run) -> list[str]:
     return [l for l in run.report.limits if not l.startswith(CODE_LIMITS)]
 
 
-def model_named_failure(run: Run) -> bool:
-    return any(w in l.lower() for l in model_limits(run) for w in FAILURE_WORDS)
+def model_named(words: tuple[str, ...]) -> Callable[[Run], bool]:
+    return lambda run: any(w.lower() in l.lower() for l in model_limits(run) for w in words)
 
 
 def tool_errors(run: Run, code: str) -> bool:
@@ -137,7 +139,7 @@ CASES = [
                        ("el informe nombra el fallo (garantizado por código)",
                         lambda r: any("not_found" in l for l in r.report.limits))],
         model_checks=[("borrador no sustentado", lambda r: r.draft_conclusion() not in ("sustentada",)),
-                      ("el modelo nombró el fallo en sus límites", model_named_failure)],
+                      ("el modelo nombró la prueba inexistente en sus límites", model_named(MISSING_TEST_WORDS))],
     ),
     Case(
         "T-03b", RF02_QUESTION,
@@ -148,7 +150,7 @@ CASES = [
                        ("ningún resultado exitoso (garantizado por código)",
                         lambda r: not any(e["ok"] for e in r.kinds("tool_result")))],
         model_checks=[("borrador no sustentado", lambda r: r.draft_conclusion() not in ("sustentada",)),
-                      ("el modelo nombró el fallo en sus límites", model_named_failure)],
+                      ("el modelo nombró la caída en sus límites", model_named(OUTAGE_WORDS))],
         env=lambda tmp: {"ANCHOR_SERVER_CMD": f'"{sys.executable}" -m evidence_anchor.server_that_does_not_exist'},
     ),
     Case(
@@ -174,6 +176,34 @@ CASES = [
 ]
 
 
+def score(case: Case, seed: int, run: Run, started: datetime, seconds: float, commit: str) -> dict:
+    system = {name: bool(check(run)) for name, check in case.system_checks}
+    model = {name: bool(check(run)) for name, check in case.model_checks}
+    return {
+        "case": case.id, "seed": seed, "commit": commit, "date": started.isoformat(timespec="seconds"),
+        "seconds": round(seconds, 1), "steps": len(run.kinds("model")), "draft": run.draft_conclusion(),
+        "final": run.report.conclusion, "system": system, "model": model,
+        "status": ("no válida (precondición)" if any(k.startswith("precondición") and not v for k, v in system.items())
+                   else "cumple" if all(system.values()) else "no cumple"),
+        "model_status": "cumple" if all(model.values()) else "no cumple",
+    }
+
+
+def rescore() -> list[dict]:
+    """Recompute every row from the saved traces (no model calls)."""
+    previous = {(r["case"], r["seed"]): r for r in json.loads((OUT / "results.json").read_text(encoding="utf-8"))}
+    rows = []
+    for case in CASES:
+        for trace in sorted(OUT.glob(f"{case.id}-seed*.jsonl")):
+            seed = int(trace.stem.split("seed")[1])
+            lines = [json.loads(line) for line in trace.read_text(encoding="utf-8").splitlines()]
+            report = Report(**next(e for e in reversed(lines) if e["kind"] == "report")["report"])
+            old = previous[(case.id, seed)]
+            rows.append(score(case, seed, Run(report, lines), datetime.fromisoformat(old["date"]),
+                              old["seconds"], old.get("commit", "-")))
+    return rows
+
+
 def execute(case: Case, seed: int) -> tuple[Run, dict]:
     OUT.mkdir(parents=True, exist_ok=True)
     trace = OUT / f"{case.id}-seed{seed}.jsonl"
@@ -189,18 +219,8 @@ def execute(case: Case, seed: int) -> tuple[Run, dict]:
                 os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)
     lines = [json.loads(line) for line in trace.read_text(encoding="utf-8").splitlines()]
     run = Run(report, lines)
-    system = {name: bool(check(run)) for name, check in case.system_checks}
-    model = {name: bool(check(run)) for name, check in case.model_checks}
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
-    row = {
-        "case": case.id, "seed": seed, "commit": commit, "date": started.isoformat(timespec="seconds"),
-        "seconds": round((datetime.now(UTC) - started).total_seconds(), 1),
-        "steps": len(run.kinds("model")), "draft": run.draft_conclusion(), "final": report.conclusion,
-        "system": system, "model": model,
-        "status": ("no válida (precondición)" if any(k.startswith("precondición") and not v for k, v in system.items())
-                   else "cumple" if all(system.values()) else "no cumple"),
-        "model_status": "cumple" if all(model.values()) else "no cumple",
-    }
+    row = score(case, seed, run, started, (datetime.now(UTC) - started).total_seconds(), commit)
     return run, row
 
 
@@ -245,8 +265,12 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--case", nargs="*", default=[c.id for c in CASES])
     parser.add_argument("--seeds", nargs="*", type=int, default=[1, 2, 3])
+    parser.add_argument("--rescore", action="store_true", help="recompute rows from saved traces only")
     args = parser.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")
+    if args.rescore:
+        write_table(rescore())
+        return
     previous = OUT / "results.json"
     rerun = {(c, seed) for c in args.case for seed in args.seeds}
     rows = [r for r in json.loads(previous.read_text(encoding="utf-8"))
