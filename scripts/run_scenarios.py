@@ -245,8 +245,8 @@ def write_table(rows: list[dict]) -> None:
     for r in rows:
         failed = [k for k, v in {**r["system"]}.items() if not v]
         model_failed = [k for k, v in r["model"].items() if not v]
-        system = r["status"] + (f" ({'; '.join(failed)})" if failed else "")
-        model = r["model_status"] + (f" ({'; '.join(model_failed)})" if model_failed else "")
+        system = r["status"] + (f" (no se cumplió: {'; '.join(failed)})" if failed else "")
+        model = r["model_status"] + (f" (no se cumplió: {'; '.join(model_failed)})" if model_failed else "")
         lines.append(f"| {r['case']} | {r['seed']} | `{r.get('commit', '-')}` | {r['date']} | {r['seconds']} | {r['steps']} | {r['draft']} | "
                      f"{r['final']} | {system} | {model} | `scenarios/{r['case']}-seed{r['seed']}.jsonl` |")
     lines += ["", "| Caso | Sistema cumple | Modelo cumple |", "|---|---|---|"]
