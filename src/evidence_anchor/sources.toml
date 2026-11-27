@@ -1,0 +1,22 @@
+# RAG corpus: existing project documents, identified by id. Paths are relative to the
+# repository root unless a top-level `root` (relative to this file) is given.
+
+[[source]]
+id = "SRC-FUN"
+path = "docs/requirements/funcionalidad.md"
+
+[[source]]
+id = "SRC-CA"
+path = "docs/requirements/criterios-aceptacion.md"
+
+[[source]]
+id = "SRC-README"
+path = "README.md"
+
+[[source]]
+id = "SRC-DEF"
+path = "docs/evidence/defects.md"
+
+[[source]]
+id = "SRC-REV"
+path = "docs/evidence/peer-review.md"
