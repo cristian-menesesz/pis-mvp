@@ -14,6 +14,17 @@ del corpus del RAG: los defectos del asistente no son requisitos del producto.
 | Corrección | El bucle avisa al modelo cuando quedan 2 pasos (prueba `test_model_is_warned_when_two_steps_remain`, roja y luego verde) y el prompt indica que puede pedir varias pruebas por turno y que bastan dos o tres vigentes. El límite sigue en 8 pasos. |
 | Reejecución | Antes: `def-a01-before-fix.jsonl` (8 pasos, sin informe). Después: `def-a01-after-fix.jsonl` (5 pasos, conclusión «sustentada» validada, citas SRC-CA, SRC-FUN, SRC-README; pruebas U-02, I-02, F-02 vigentes). |
 
+## DEF-A02 · El bucle terminaba la ejecución por un segundo turno sin herramienta · prioridad alta · corregido
+
+| Campo | Contenido |
+|---|---|
+| Condiciones de reproducción | Escenarios T-01 y T-01b, semilla 2, temperatura 0,3 (primera corrida completa de escenarios). |
+| Esperado | La ejecución termina solo con un informe entregado o al llegar al límite de 8 pasos (diseño, §5.5). |
+| Observado | En el paso 2 el modelo resumió los requisitos en texto (recibió el recordatorio); en el paso 4, con U-02 e I-02 ya aprobadas, escribió «Entrego ahora el informe final» sin llamar a `submit_report`. El bucle se detuvo en el paso 4 con «no concluyente». No hubo un éxito falso, pero el sistema no cumplió T-01 y T-01b en esa semilla (2/3 cada uno). |
+| Causa probable | Defecto del bucle, no del modelo: permitía un solo recordatorio por ejecución y terminaba al segundo turno de solo texto, aunque fuera mucho después del primero. Eso contradice el diseño, que solo termina por informe o por límite de pasos. |
+| Corrección | Cada turno sin herramienta recibe un recordatorio; solo el informe o el límite de pasos terminan la ejecución (pruebas `test_announcing_the_report_in_text_does_not_end_the_run` y `test_plain_text_turns_are_reminded_until_the_step_limit`, rojas y luego verdes). |
+| Reejecución | Antes: `scenarios-run1/` (16/18 corridas cumplen a nivel de sistema). Después: `scenarios/` y `scenarios.md`, las 18 corridas repetidas con el código corregido. |
+
 ## Limitaciones conocidas
 
 | ID | Limitación | Impacto | Acción propuesta |

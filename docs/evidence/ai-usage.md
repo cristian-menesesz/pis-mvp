@@ -46,6 +46,38 @@ Ningún resultado de este repositorio es una sugerencia sin ejecutar: cada estad
 | 8 | Dependencias | Advertencia de obsolescencia de `httpx` en el cliente de pruebas | La IA intentó instalar `httpx2`, el reemplazo que sugería el mensaje | **Rechazado** por el control de seguridad del entorno (paquete sugerido solo por un mensaje de advertencia); se mantuvo `httpx` y se filtró esa advertencia | Suite en verde sin la dependencia nueva | `pyproject.toml` |
 | 9 | Informe técnico | Redactar el complemento técnico y la entrega individual en LaTeX, en primera persona, a partir de la evidencia del repositorio | Borrador completo del informe (compilado con MiKTeX) | El estudiante revisa y ajusta el texto antes de entregarlo | Cada cifra del informe se tomó de las salidas guardadas en `docs/evidence/` | Informe (fuera del repositorio) |
 
+## Asistente evidence-anchor (2026-11-27)
+
+En este trabajo intervienen **dos IA con papeles distintos**. Claude Code (Claude Opus
+5.5) diseñó, programó y verificó el asistente bajo la dirección del estudiante.
+`qwen3.5:4b`, ejecutado con Ollama, es el modelo **dentro** del asistente: es parte del
+sistema bajo prueba. Sus salidas nunca se tomaron como hallazgos ni como instrucciones;
+se registran y se evalúan con criterios calculados por código.
+
+### Decisiones tomadas por el estudiante
+
+| Decisión | Opciones planteadas | Elección |
+|---|---|---|
+| Modelo del agente | Ollama local, API de Claude, ambos | Ollama local (presupuesto cero) |
+| Recuperación | Solo léxica, híbrida en SQLite, base vectorial dedicada | Híbrida en SQLite, fragmentación por estructura |
+| Documento completo en el contexto | Comparar como modo alternativo | Descartado: se hace RAG |
+| Repositorio | Mismo repositorio, uno nuevo | Mismo repositorio, paquete aparte |
+| Aprobación humana de `run_test` | Puerta de aprobación, sin aprobación | Sin aprobación: pruebas controladas y ninguna herramienta escribe |
+| Verificaciones humanas | Redacta el asistente y confirma el estudiante, solo el estudiante | Redacta el asistente, confirma el estudiante |
+| Nombre | Título de la práctica, otro | `evidence-anchor` |
+
+### Registro de usos relevantes
+
+| # | Objetivo | Instrucción o consulta | Aporte de la IA | Qué se modificó, rechazó o adaptó | Cómo se validó | Evidencia |
+|---|---|---|---|---|---|---|
+| 10 | Diseño | «Antes de hacer nada, discute qué vas a hacer» | Alternativas de recuperación y de fragmentación, diseño escrito y revisado por un agente sin contexto | El estudiante descartó el modo de documento completo y la aprobación humana; cinco preguntas del revisor resueltas | Diseño aprobado antes de programar | `docs/design/evidence-anchor.md` |
+| 11 | Elección del modelo | Comprobar llamadas a herramientas en local | Script de prueba con `qwen3.5:4b` y `llama3.2` | Se mantuvo `qwen3.5:4b` (3/3 llamadas válidas) | Ejecución real | `assistant/model-smoke.txt` |
+| 12 | RAG | Índice híbrido persistente y umbral de evidencia | Fragmentación, índice, búsqueda, calibración | El umbral no separa del todo las preguntas: se declaró como LIM-A01 en lugar de ajustarlo a mano | 20 preguntas etiquetadas (etiquetas pendientes de confirmación del estudiante) | `assistant/calibration*.{md,txt}` |
+| 13 | MCP | Servidor real con herramientas de verificación | Servidor con el SDK oficial 2.3 y tres herramientas | El SDK antepone texto a los errores; el cliente extrae el JSON | 7 pruebas con el cliente real del SDK | `tests/assistant/test_mcp_server.py` |
+| 14 | Agente | Decisiones del modelo, controles en código | Bucle, lista blanca, validador, trazas | La primera ejecución real agotó los pasos (DEF-A01); se corrigió el bucle, no la salida del modelo | Prueba roja y luego verde; traza antes y después | `assistant/defects.md`, `assistant/def-a01-*.jsonl` |
+| 15 | Escenarios | T-01 a T-04 contra el modelo real | Script con criterios calculados por código y 3 semillas | Los resultados se registran tal como salen; no se ajustó el prompt para aprobarlos | Ejecución real de 18 corridas | `assistant/scenarios.md`, `assistant/scenarios/` |
+| 16 | Error propio | — | Claude Code editó el README (fuente del RAG) mientras corrían los escenarios | Se restauró en menos de dos minutos; la documentación del asistente pasó a `docs/assistant/README.md` | La primera corrida afectada recuperó solo fragmentos de la funcionalidad | Traza `T-01-seed1.jsonl` |
+
 ## Verificación personal del estudiante (completar)
 
 El enunciado exige que el estudiante pueda explicar todo lo entregado. Estos puntos

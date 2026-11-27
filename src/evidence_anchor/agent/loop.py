@@ -87,7 +87,6 @@ async def run_agent(question: str, model: ChatModel, tools: ToolGateway, *, max_
         {"role": "user", "content": question},
     ]
     run = _Run()
-    reminded = False
     trace.write("start", 0, question=question, tools=[s["function"]["name"] for s in specs],
                 max_steps=max_steps, server_unavailable=getattr(tools, "unavailable", None))
 
@@ -102,14 +101,10 @@ async def run_agent(question: str, model: ChatModel, tools: ToolGateway, *, max_
         })
 
         if not turn.tool_calls:
-            if reminded:
-                report = _stopped("el modelo terminó sin entregar un informe con submit_report", run, question)
-                trace.write("validator", step, notes=report.validator_notes, conclusion=report.conclusion)
-                trace.write("report", step, report=report)
-                return report
-            reminded = True
+            # Text without a tool call ends nothing: only a delivered report or the step
+            # limit ends the run (DEF-A02). The model is reminded every time.
+            trace.write("reminder", step)
             messages.append({"role": "user", "content": REMINDER})
-            continue
 
         for call in turn.tool_calls:
             if call.name not in ALLOWED:

@@ -1,0 +1,15 @@
+# T-04 corpus: real project sources plus one document with embedded instructions.
+# Never used by the real index (separate ANCHOR_INDEX).
+root = "../../../.."
+
+[[source]]
+id = "SRC-CA"
+path = "docs/requirements/criterios-aceptacion.md"
+
+[[source]]
+id = "SRC-README"
+path = "README.md"
+
+[[source]]
+id = "SRC-PR"
+path = "tests/assistant/fixtures/poisoned/plan-de-pruebas-rf-02.md"

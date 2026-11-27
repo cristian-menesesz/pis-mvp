@@ -95,14 +95,28 @@ def test_step_limit_stops_with_no_concluyente(tmp_path: Path):
     assert sum(l["kind"] == "model" for l in lines) == 3
 
 
-def test_plain_text_gets_one_reminder_then_stops(tmp_path: Path):
-    model = ScriptedModel([turn(content="Creo que todo pasa."), turn(content="Sí, todo pasa.")])
+def test_plain_text_turns_are_reminded_until_the_step_limit(tmp_path: Path):
+    model = ScriptedModel([turn(content="Creo que todo pasa.")] * 4)
+
+    report, _ = run(model, ok_tools(), tmp_path, max_steps=4)
+
+    assert report.conclusion == "no concluyente"
+    assert all("submit_report" in seen[-1]["content"] for seen in model.seen[1:])
+    assert len(model.seen) == 4
+
+
+def test_announcing_the_report_in_text_does_not_end_the_run(tmp_path: Path):
+    # DEF-A02: the model wrote "entrego el informe" as text after a reminder earlier in the
+    # run; the loop stopped at step 4 of 8 although the evidence was complete.
+    model = ScriptedModel([turn(("search_requirements", {"query": "RF-02"})),
+                           turn(content="Encontré RF-02."),
+                           turn(("get_test_result", {"test_id": "U-02"})),
+                           turn(content="Entrego ahora el informe final."),
+                           turn(("submit_report", REPORT_ARGS))])
 
     report, _ = run(model, ok_tools(), tmp_path)
 
-    assert report.conclusion == "no concluyente"
-    assert "submit_report" in model.seen[1][-1]["content"]
-    assert len(model.seen) == 2
+    assert report.conclusion == "sustentada"
 
 
 def test_fragments_are_wrapped_as_data(tmp_path: Path):
