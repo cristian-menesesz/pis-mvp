@@ -34,4 +34,4 @@ Lectura: el umbral separa bien las preguntas claramente ajenas al proyecto (Q-15
 Q-18 a Q-20), pero no las que reutilizan el vocabulario del dominio: Q-13, Q-14 y Q-17
 superan τ aunque el corpus no las responde. El umbral es por tanto un primer filtro, no
 la decisión completa: en esas preguntas, decidir que no hay respaldo queda a cargo del
-agente, y T-02 usa justamente Q-13 para probarlo. Se registra como limitación LIM-A01.
+agente, y T-02 usa justamente Q-13 para probarlo. Se registra como limitación LIM-A01 (docs/evidence/assistant/defects.md).
