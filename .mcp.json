@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "evidence-anchor": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "--group", "assistant", "python", "-m", "evidence_anchor.mcp_server"]
+    }
+  }
+}
