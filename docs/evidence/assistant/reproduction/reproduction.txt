@@ -1,11 +1,11 @@
-date: 2026-11-27T15:57:20Z
-clone: git clone <repo> (copia limpia, commit 4c3debc)
+date: 2026-11-27T18:47:43Z
+clone: git clone <repo> (copia limpia, commit 79fb869)
 
 $ uv sync --all-groups
  + uvicorn==0.54.0
 
-$ uv run pytest -m assistant -q
-74 passed, 51 deselected in 35.66s
+$ uv run pytest -q
+133 passed in 37.74s
 
 $ uv run python scripts/run_scenarios.py --case T-03a --seeds 1
-{"case": "T-03a", "seed": 1, "date": "2026-11-27T15:58:07+00:00", "seconds": 70.8, "steps": 6, "draft": "no sustentada", "final": "no sustentada", "system": {"no declara sustentada": true, "error not_found registrado": true, "U-99 no figura como verificada": true}, "model": {"borrador no sustentado": true}, "status": "cumple", "model_status": "cumple"}
+{"case": "T-03a", "seed": 1, "commit": "79fb869", "date": "2026-11-27T18:48:31+00:00", "seconds": 78.6, "steps": 5, "draft": "no concluyente", "final": "no concluyente", "system": {"conclusión no concluyente": true, "error not_found registrado": true, "U-99 no figura como verificada": true, "el informe nombra el fallo (garantizado por código)": true}, "model": {"borrador no sustentado": true, "el modelo nombró la prueba inexistente en sus límites": true}, "status": "cumple", "model_status": "cumple"}
