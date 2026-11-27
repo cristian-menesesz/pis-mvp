@@ -3,6 +3,7 @@
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
+import httpx
 import ollama
 
 
@@ -19,6 +20,10 @@ class ModelTurn:
     tool_calls: list[ToolCall] = field(default_factory=list)
 
 
+class ModelUnavailable(RuntimeError):
+    """The language model could not be reached or failed."""
+
+
 class ChatModel(Protocol):
     def chat(self, messages: list[dict], tools: list[dict]) -> ModelTurn: ...
 
@@ -32,9 +37,12 @@ class OllamaChatModel:
         self._client = ollama.Client(host=host, timeout=600)
 
     def chat(self, messages: list[dict], tools: list[dict]) -> ModelTurn:
-        response = self._client.chat(
-            model=self.model, messages=messages, tools=tools, options=self.options, think=self.think
-        )
+        try:
+            response = self._client.chat(
+                model=self.model, messages=messages, tools=tools, options=self.options, think=self.think
+            )
+        except (ollama.ResponseError, httpx.HTTPError, ConnectionError) as exc:
+            raise ModelUnavailable(f"model {self.model!r} unavailable: {exc}") from exc
         message = response.message
         calls = [ToolCall(c.function.name, dict(c.function.arguments or {})) for c in message.tool_calls or []]
         return ModelTurn(content=message.content or "", thinking=message.thinking, tool_calls=calls)

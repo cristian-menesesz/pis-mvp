@@ -20,7 +20,8 @@ def report(**overrides) -> Report:
 
 def facts(**overrides) -> RunFacts:
     base = dict(retrieved_ids={"SRC-CA#ca-02"}, results={"U-02": result("U-02")}, sufficient_searches=1,
-                tools_called=["search_requirements", "get_test_result"], errors_by_test={})
+                tools_called=["search_requirements", "get_test_result"], errors_by_test={}, searches=1,
+                errors=[], failed_ids=set())
     return RunFacts(**{**base, **overrides})
 
 
@@ -85,7 +86,7 @@ def test_tools_used_is_replaced_by_the_tools_actually_called():
 def test_negative_conclusions_are_never_upgraded():
     checked = validate(report(conclusion="no sustentada"), facts())
 
-    assert checked.conclusion == "no sustentada"
+    assert checked.conclusion != "sustentada"  # unbacked "no sustentada" becomes "no concluyente" (I-2)
 
 
 def test_report_without_limits_gets_a_stated_limit():
@@ -93,3 +94,45 @@ def test_report_without_limits_gets_a_stated_limit():
 
     assert checked.limits and "no declaró límites" in checked.limits[0]
     assert checked.conclusion == "sustentada"
+
+
+def test_no_sustentada_without_any_evidence_becomes_no_concluyente():
+    # Review I-2: with the server down the model said "no sustentada" with no evidence at all.
+    checked = validate(report(conclusion="no sustentada", sources=[], verified_results=[]),
+                       facts(retrieved_ids=set(), results={}, sufficient_searches=0, tools_called=["search_requirements"],
+                             searches=0))
+
+    assert checked.conclusion == "no concluyente"
+
+
+def test_no_sustentada_with_invented_citation_becomes_no_concluyente():
+    checked = validate(report(conclusion="no sustentada", sources=["SRC-X#invented"]), facts())
+
+    assert checked.conclusion == "no concluyente"
+
+
+def test_no_sustentada_backed_by_a_failed_current_test_stands():
+    checked = validate(report(conclusion="no sustentada"), facts(results={"U-02": result("U-02", status="failed")}))
+
+    assert checked.conclusion == "no sustentada"
+
+
+def test_no_sustentada_backed_by_insufficient_searches_stands():
+    checked = validate(report(conclusion="no sustentada", sources=[], verified_results=[]),
+                       facts(retrieved_ids=set(), results={}, sufficient_searches=0, searches=2))
+
+    assert checked.conclusion == "no sustentada"
+
+
+def test_tool_errors_are_named_in_the_limits():
+    checked = validate(report(conclusion="no concluyente", verified_results=[]),
+                       facts(results={}, errors=[("get_test_result", "not_found")]))
+
+    assert any("get_test_result" in l and "not_found" in l for l in checked.limits)
+
+
+def test_an_earlier_failed_result_blocks_sustentada():
+    # Review M-1: a failure seen in this run must not be hidden by a later pass.
+    checked = validate(report(), facts(failed_ids={"U-02"}))
+
+    assert checked.conclusion == "no concluyente"

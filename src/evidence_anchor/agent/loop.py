@@ -6,9 +6,10 @@ and call in the trace, and validates the final report against what this run obta
 """
 
 import json
+import time
 from typing import Any
 
-from evidence_anchor.agent.llm import ChatModel
+from evidence_anchor.agent.llm import ChatModel, ModelUnavailable
 from evidence_anchor.agent.prompts import FRAGMENTS_NOTE, REMINDER, SYSTEM_PROMPT
 from evidence_anchor.agent.report import SUBMIT_REPORT_SPEC, Report, ReportFormatError, parse_report
 from evidence_anchor.agent.tools import ToolGateway
@@ -19,6 +20,7 @@ from evidence_anchor.testing.results import CaseResult, TestResult
 EVIDENCE_TOOLS = ("search_requirements", "get_test_result", "run_test")
 ALLOWED = (*EVIDENCE_TOOLS, "submit_report")
 BUDGET_WARNING_AT = 2
+MAX_SECONDS = 900
 BUDGET_WARNING = (
     f"Atención: quedan {BUDGET_WARNING_AT} pasos. Con la evidencia que ya obtuviste, llama ahora a "
     "submit_report; si falta evidencia, indícalo en los límites."
@@ -52,25 +54,33 @@ class _Run:
         self.sufficient_searches = 0
         self.tools_called: list[str] = []
         self.errors_by_test: dict[str, str] = {}
+        self.searches = 0
+        self.errors: list[tuple[str, str]] = []
+        self.failed_ids: set[str] = set()
 
     def record(self, name: str, arguments: dict, ok: bool, data: dict[str, Any]) -> None:
         if name not in self.tools_called:
             self.tools_called.append(name)
         test_id = arguments.get("test_id")
         if not ok:
+            self.errors.append((name, str(data.get("error", "error"))))
             if isinstance(test_id, str):
                 self.errors_by_test[test_id] = data.get("error", "error")
             return
         if name == "search_requirements":
+            self.searches += 1
             self.retrieved.update(h["chunk_id"] for h in data.get("hits", []))
             self.sufficient_searches += bool(data.get("sufficient"))
         else:
             result = _test_result(data)
+            if result.status == "failed":
+                self.failed_ids.add(result.test_id)
             self.results[result.test_id] = result
             self.errors_by_test.pop(result.test_id, None)
 
     def facts(self) -> RunFacts:
-        return RunFacts(self.retrieved, self.results, self.sufficient_searches, self.tools_called, self.errors_by_test)
+        return RunFacts(self.retrieved, self.results, self.sufficient_searches, self.tools_called, self.errors_by_test,
+                        searches=self.searches, errors=list(self.errors), failed_ids=set(self.failed_ids))
 
 
 def _stopped(reason: str, run: _Run, question: str) -> Report:
@@ -79,8 +89,14 @@ def _stopped(reason: str, run: _Run, question: str) -> Report:
     return validate(report, run.facts())
 
 
+def _finish(report: Report, step: int, trace: TraceWriter) -> Report:
+    trace.write("validator", step, notes=report.validator_notes, conclusion=report.conclusion)
+    trace.write("report", step, report=report)
+    return report
+
+
 async def run_agent(question: str, model: ChatModel, tools: ToolGateway, *, max_steps: int = 8,
-                    trace: TraceWriter) -> Report:
+                    max_seconds: float | None = MAX_SECONDS, trace: TraceWriter) -> Report:
     specs = [*tools.specs(), SUBMIT_REPORT_SPEC]
     messages: list[dict[str, Any]] = [
         {"role": "system", "content": SYSTEM_PROMPT},
@@ -90,8 +106,15 @@ async def run_agent(question: str, model: ChatModel, tools: ToolGateway, *, max_
     trace.write("start", 0, question=question, tools=[s["function"]["name"] for s in specs],
                 max_steps=max_steps, server_unavailable=getattr(tools, "unavailable", None))
 
+    started = time.monotonic()
     for step in range(1, max_steps + 1):
-        turn = model.chat(messages, specs)
+        if max_seconds is not None and time.monotonic() - started >= max_seconds:
+            return _finish(_stopped(f"se alcanzó el límite de tiempo de {max_seconds} s", run, question), step, trace)
+        try:
+            turn = model.chat(messages, specs)
+        except ModelUnavailable as exc:
+            trace.write("model_error", step, error=str(exc))
+            return _finish(_stopped(f"modelo no disponible: {exc}", run, question), step, trace)
         trace.write("model", step, content=turn.content, thinking=turn.thinking,
                     tool_calls=[{"name": c.name, "arguments": c.arguments} for c in turn.tool_calls])
         messages.append({

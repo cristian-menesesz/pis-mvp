@@ -176,3 +176,30 @@ def test_model_is_warned_when_two_steps_remain(tmp_path: Path):
     budget = [m for m in model.seen[2] if m["role"] == "user" and "quedan 2 pasos" in m["content"]]
     assert len(budget) == 1
     assert "submit_report" in budget[0]["content"]
+
+
+class DownModel:
+    def chat(self, messages, tools):
+        from evidence_anchor.agent.llm import ModelUnavailable
+        raise ModelUnavailable("model 'qwen3.5:4b' unavailable: connection refused")
+
+
+def test_model_unavailable_ends_with_a_report_not_a_crash(tmp_path: Path):
+    # Review I-1.
+    report, lines = run(DownModel(), ok_tools(), tmp_path)
+
+    assert report.conclusion == "no concluyente"
+    assert any("modelo no disponible" in n for n in report.validator_notes)
+    assert lines[-1]["kind"] == "report"
+
+
+def test_run_time_limit_stops_the_run(tmp_path: Path):
+    # Review M-11: the design asks for a time limit as well as a step limit.
+    model = ScriptedModel([turn(("search_requirements", {"query": "x"}))] * 5)
+    trace = TraceWriter(tmp_path / "trace.jsonl")
+
+    report = asyncio.run(run_agent("q", model, ok_tools(), max_steps=8, max_seconds=0, trace=trace))
+
+    assert report.conclusion == "no concluyente"
+    assert any("tiempo" in n for n in report.validator_notes)
+    assert model.seen == []
