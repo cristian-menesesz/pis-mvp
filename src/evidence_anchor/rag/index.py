@@ -99,7 +99,7 @@ class HybridIndex:
                     "INSERT INTO sources (id, path, commit_id, sha256) VALUES (?, ?, ?, ?) "
                     "ON CONFLICT(id) DO UPDATE SET path = excluded.path, "
                     "commit_id = excluded.commit_id, sha256 = excluded.sha256",
-                    (source.id, source.path.as_posix(), source.commit, source.sha256),
+                    (source.id, source.display_path or source.path.as_posix(), source.commit, source.sha256),
                 )
             for (_, chunk), vector in zip(new, vectors, strict=True):
                 conn.execute(

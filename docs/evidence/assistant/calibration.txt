@@ -1,0 +1,37 @@
+date: 2026-11-27T14:10:18+00:00
+commit: 040f32ce815ea062968d7b22f5ef3626673d0753
+embedding model: nomic-embed-text; chunks indexed: 80
+
+| ID | Etiqueta | Coseno máximo | Mejor fragmento |
+|---|---|---|---|
+| Q-01 | con respaldo | 0.7517 | SRC-CA#ca-02-rechazar-comentarios-en-una-ronda-cerrada-rf-02 |
+| Q-02 | con respaldo | 0.7026 | SRC-FUN#alcance |
+| Q-03 | con respaldo | 0.7400 | SRC-CA#ca-03-cerrar-una-ronda-ya-cerrada-no-cambia-nada-rf-03 |
+| Q-04 | con respaldo | 0.6947 | SRC-README#requisitos |
+| Q-05 | con respaldo | 0.7999 | SRC-REV#observaciones-y-tratamiento/1 |
+| Q-06 | con respaldo | 0.7728 | SRC-DEF#def-01-contrato-de-error-422-inconsistente-prioridad-media-corregido/causa-probable |
+| Q-07 | con respaldo | 0.7337 | SRC-DEF#def-01-contrato-de-error-422-inconsistente-prioridad-media-corregido/deteccion |
+| Q-08 | con respaldo | 0.6979 | SRC-README#requisitos |
+| Q-09 | con respaldo | 0.8361 | SRC-REV#quien-reviso-y-por-que-asi |
+| Q-10 | con respaldo | 0.7304 | SRC-CA#ca-02-rechazar-comentarios-en-una-ronda-cerrada-rf-02 |
+| Q-11 | con respaldo | 0.6939 | SRC-CA#ca-02-rechazar-comentarios-en-una-ronda-cerrada-rf-02 |
+| Q-12 | con respaldo | 0.7206 | SRC-FUN#fuera-de-alcance |
+| Q-13 | sin respaldo | 0.7275 | SRC-FUN#alcance |
+| Q-14 | sin respaldo | 0.7146 | SRC-REV#quien-reviso-y-por-que-asi |
+| Q-15 | sin respaldo | 0.6799 | SRC-README#requisitos |
+| Q-16 | sin respaldo | 0.6630 | SRC-README#inicio |
+| Q-17 | sin respaldo | 0.6982 | SRC-DEF#inicio |
+| Q-18 | sin respaldo | 0.5646 | SRC-REV#observaciones-y-tratamiento/3 |
+| Q-19 | sin respaldo | 0.6722 | SRC-FUN#fuera-de-alcance |
+| Q-20 | sin respaldo | 0.6794 | SRC-DEF#defectos-de-las-herramientas-de-verificacion |
+
+menor coseno con respaldo: 0.6939
+mayor coseno sin respaldo: 0.7275
+separación: no (las distribuciones se solapan)
+umbral elegido τ = 0.6869; errores de clasificación: 3 de 20
+
+Lectura: el umbral separa bien las preguntas claramente ajenas al proyecto (Q-15, Q-16,
+Q-18 a Q-20), pero no las que reutilizan el vocabulario del dominio: Q-13, Q-14 y Q-17
+superan τ aunque el corpus no las responde. El umbral es por tanto un primer filtro, no
+la decisión completa: en esas preguntas, decidir que no hay respaldo queda a cargo del
+agente, y T-02 usa justamente Q-13 para probarlo. Se registra como limitación LIM-A01.

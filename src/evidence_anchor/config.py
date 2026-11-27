@@ -6,7 +6,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # Minimum best-match cosine similarity for retrieval to count as evidence.
 # Calibrated by scripts/calibrate_threshold.py; see docs/evidence/assistant/calibration.txt.
-DEFAULT_SUFFICIENCY_THRESHOLD = 0.0
+DEFAULT_SUFFICIENCY_THRESHOLD = 0.6869
 
 
 @dataclass(frozen=True)

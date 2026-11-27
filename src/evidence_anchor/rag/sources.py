@@ -16,6 +16,7 @@ class Source:
     text: str
     commit: str
     sha256: str
+    display_path: str = ""  # path as configured, used in citations
 
 
 def file_commit(path: Path) -> str:
@@ -45,6 +46,7 @@ def load_sources(repo_root: Path, config: Path | None = None) -> list[Source]:
                 text=raw.decode("utf-8"),
                 commit=file_commit(path),
                 sha256=hashlib.sha256(raw).hexdigest(),
+                display_path=entry["path"],
             )
         )
     return sources
