@@ -1,0 +1,181 @@
+{
+  "date": "2026-11-27T14:59:35+00:00",
+  "commit": "66a21eb125b6b9dc0316656a4c7fc827b83377a8",
+  "model": "qwen3.5:4b",
+  "answers": [
+    {
+      "id": "RAG-1",
+      "question": "¿Qué ocurre si un revisor intenta comentar en una ronda cerrada y qué pruebas lo verifican?",
+      "text": "Si un revisor intenta comentar en una ronda cerrada, el sistema rechaza la acción con el código de estado 409 sin guardar ningún dato ni modificar los comentarios existentes [SRC-FUN#reglas]. Esta verificación se confirma mediante las pruebas U-02, U-02b, U-05 e I-02 que validan el rechazo inmediato antes de cualquier problema de entrada [SRC-CA#ca-02-rechazar-comentarios-en-una-ronda-cerrada-rf-02]. Además, se garantiza mediante la prueba F-04 y C-01 que ningún comentario aceptado tendrá una hora de creación posterior a la del cierre de su ronda [SRC-FUN#reglas].",
+      "hits": [
+        {
+          "chunk_id": "SRC-CA#ca-02-rechazar-comentarios-en-una-ronda-cerrada-rf-02",
+          "heading_path": "Criterios de aceptación: comentario anclado a una región › CA-02 · Rechazar comentarios en una ronda cerrada (RF-02)",
+          "source_id": "SRC-CA",
+          "source_path": "docs/requirements/criterios-aceptacion.md",
+          "source_commit": "b48c41e64ecd02e0f2a81966612d53757e456a37",
+          "text": "Criterios de aceptación: comentario anclado a una región › CA-02 · Rechazar comentarios en una ronda cerrada (RF-02)\n- **Dado** una ronda cerrada,\n- **cuando** un revisor envía un comentario, aunque sea válido,\n- **entonces** se rechaza con 409, no se guarda nada y los comentarios existentes de la\n  ronda no cambian.\n- Si la ronda se cierra entre la comprobación del servicio y la escritura, tampoco se\n  guarda nada.\n- Ningún comentario aceptado tiene una hora de creación posterior a la hora de cierre de\n  su ronda.\n- Verificado por: U-02, U-02b, U-05, I-02, F-02, F-04, C-01, C-04.",
+          "rrf_score": 0.03149801587301587,
+          "bm25": 6.365240826910305,
+          "cosine": 0.721055269241333
+        },
+        {
+          "chunk_id": "SRC-README#requisitos",
+          "heading_path": "Comentarios anclados a una región › Requisitos",
+          "source_id": "SRC-README",
+          "source_path": "README.md",
+          "source_commit": "1b01714825042d3235570409342f69cd2f455a25",
+          "text": "Comentarios anclados a una región › Requisitos\nReglas decididas para el prototipo (la especificación las dejaba abiertas):\n\n- Un trazo de un solo punto (o de puntos idénticos) produce una caja de tamaño cero.\n- Se rechazan (422): trazo vacío, coordenadas no finitas, trazo totalmente fuera del\n  ítem, texto o nombre en blanco, versión que no pertenece al ítem.\n- El texto del revisor se guarda tal como lo escribió (nunca se reescribe).\n- Si la ronda está cerrada, se informa eso (409) antes que cualquier problema de la entrada.\n- Ningún comentario aceptado tiene `created_at` posterior al `closed_at` de su ronda.",
+          "rrf_score": 0.030621785881252923,
+          "bm25": 7.986784120957921,
+          "cosine": 0.6946344971656799
+        },
+        {
+          "chunk_id": "SRC-REV#observaciones-y-tratamiento/1",
+          "heading_path": "Revisión de las pruebas › Observaciones y tratamiento",
+          "source_id": "SRC-REV",
+          "source_path": "docs/evidence/peer-review.md",
+          "source_commit": "59f9586d8cacb390545dba2015de75bf43f063c1",
+          "text": "Revisión de las pruebas › Observaciones y tratamiento\n#: 1 | Observación del revisor: «El texto se guarda tal cual» solo se probaba sobre el doble en memoria; un `.strip()` en el repositorio o en el modelo HTTP pasaría inadvertido. El nombre del revisor nunca se probaba. | ¿Se aplicó?: Sí | Por qué / cómo se comprobó: Nueva **I-04**: texto y nombre con espacios y salto de línea, verificados en la respuesta, en `GET` y en la fila de SQLite. La mutación **M10** (strip al insertar) sobrevivía a la suite anterior y ahora la detecta I-04.",
+          "rrf_score": 0.030536130536130537,
+          "bm25": 5.068440510908514,
+          "cosine": 0.7146160006523132
+        },
+        {
+          "chunk_id": "SRC-FUN#reglas",
+          "heading_path": "Funcionalidad: registrar un comentario anclado a una región › Reglas",
+          "source_id": "SRC-FUN",
+          "source_path": "docs/requirements/funcionalidad.md",
+          "source_commit": "b48c41e64ecd02e0f2a81966612d53757e456a37",
+          "text": "Funcionalidad: registrar un comentario anclado a una región › Reglas\n- Solo se aceptan comentarios en una ronda abierta; si está cerrada se rechaza y no se guarda nada.\n- La caja se calcula como el rectángulo mínimo que contiene los puntos del trazo y se recorta a las dimensiones del ítem.\n- El comentario queda asociado a la versión del ítem y a la ronda.\n- El comentario requiere texto.\n- Cerrar una ronda ya cerrada no cambia nada.",
+          "rrf_score": 0.030330882352941176,
+          "bm25": 6.044860458611341,
+          "cosine": 0.6948392391204834
+        }
+      ],
+      "sufficient": true,
+      "max_cosine": 0.74033522605896,
+      "cited": [
+        "SRC-FUN#reglas",
+        "SRC-CA#ca-02-rechazar-comentarios-en-una-ronda-cerrada-rf-02"
+      ],
+      "invalid_citations": []
+    },
+    {
+      "id": "RAG-2",
+      "question": "¿Cómo se calcula la caja del comentario cuando el trazo sale de la imagen?",
+      "text": "La caja delimitadora se calcula como el rectángulo mínimo que contiene los puntos del trazo [SRC-FUN#reglas]. Cuando este cálculo resulta fuera de las dimensiones del ítem, la caja se recorta a sus bordes correspondientes [SRC-CA#ca-01-registrar-y-recuperar-un-comentario-anclado-rf-01]. Si el trazo sale completamente de la imagen o tiene coordenadas no finitas, se rechaza y no se guarda nada [SRC-FUN#reglas].",
+      "hits": [
+        {
+          "chunk_id": "SRC-CA#ca-01-registrar-y-recuperar-un-comentario-anclado-rf-01",
+          "heading_path": "Criterios de aceptación: comentario anclado a una región › CA-01 · Registrar y recuperar un comentario anclado (RF-01)",
+          "source_id": "SRC-CA",
+          "source_path": "docs/requirements/criterios-aceptacion.md",
+          "source_commit": "b48c41e64ecd02e0f2a81966612d53757e456a37",
+          "text": "Criterios de aceptación: comentario anclado a una región › CA-01 · Registrar y recuperar un comentario anclado (RF-01)\n- **Dado** una ronda abierta y la versión 1 del ítem «póster», de 1200 × 800 píxeles,\n- **cuando** un revisor envía un trazo con los puntos (100, 50), (300, 200) y (150, 120),\n  el texto «Mover el logo» y su nombre,\n- **entonces** se guarda un comentario con la caja x = 100, y = 50, ancho = 200,\n  alto = 150, asociado a esa ronda, ítem y versión, con el texto y el nombre tal como se\n  escribieron, y el comentario se puede recuperar por su identificador.\n- Si el trazo sale de la imagen, la caja se recorta a sus bordes; un trazo de un solo\n  punto produce una caja de tamaño cero; un trazo vacío, totalmente fuera de la imagen,\n  con coordenadas no finitas, o un texto o nombre en blanco se rechazan (422) y no se\n  guarda nada.\n- Verificado por: U-01, U-03a a U-03d, U-04, I-01, I-03, I-04, I-05.",
+          "rrf_score": 0.03252247488101534,
+          "bm25": 12.832042647678495,
+          "cosine": 0.717129647731781
+        },
+        {
+          "chunk_id": "SRC-FUN#alcance",
+          "heading_path": "Funcionalidad: registrar un comentario anclado a una región › Alcance",
+          "source_id": "SRC-FUN",
+          "source_path": "docs/requirements/funcionalidad.md",
+          "source_commit": "b48c41e64ecd02e0f2a81966612d53757e456a37",
+          "text": "Funcionalidad: registrar un comentario anclado a una región › Alcance\nEl sistema recibe los puntos del trazo del revisor sobre un ítem (imagen), calcula la caja delimitadora y guarda el comentario con su región, su versión y su ronda. El comentario se puede recuperar. El revisor puede cerrar la ronda.",
+          "rrf_score": 0.03252247488101534,
+          "bm25": 12.63661593407,
+          "cosine": 0.7209316492080688
+        },
+        {
+          "chunk_id": "SRC-FUN#reglas",
+          "heading_path": "Funcionalidad: registrar un comentario anclado a una región › Reglas",
+          "source_id": "SRC-FUN",
+          "source_path": "docs/requirements/funcionalidad.md",
+          "source_commit": "b48c41e64ecd02e0f2a81966612d53757e456a37",
+          "text": "Funcionalidad: registrar un comentario anclado a una región › Reglas\n- Solo se aceptan comentarios en una ronda abierta; si está cerrada se rechaza y no se guarda nada.\n- La caja se calcula como el rectángulo mínimo que contiene los puntos del trazo y se recorta a las dimensiones del ítem.\n- El comentario queda asociado a la versión del ítem y a la ronda.\n- El comentario requiere texto.\n- Cerrar una ronda ya cerrada no cambia nada.",
+          "rrf_score": 0.031746031746031744,
+          "bm25": 10.047708018709919,
+          "cosine": 0.7083121538162231
+        },
+        {
+          "chunk_id": "SRC-README#inicio",
+          "heading_path": "Comentarios anclados a una región",
+          "source_id": "SRC-README",
+          "source_path": "README.md",
+          "source_commit": "1b01714825042d3235570409342f69cd2f455a25",
+          "text": "Comentarios anclados a una región\nPrototipo de una funcionalidad del MVP *Visual Review Tool for Freelancers*: el\nrevisor traza sobre un ítem (imagen), el sistema calcula la caja delimitadora del\ntrazo, la recorta al ítem y guarda el comentario con su ronda, ítem y versión. El\nrevisor puede cerrar la ronda.\n\nEl repositorio contiene la funcionalidad y su verificación: pruebas unitarias, de\nintegración y de fallo, más los registros de evidencia en `docs/evidence/`.",
+          "rrf_score": 0.030776515151515152,
+          "bm25": 9.760498789438733,
+          "cosine": 0.6790934801101685
+        }
+      ],
+      "sufficient": true,
+      "max_cosine": 0.7209316492080688,
+      "cited": [
+        "SRC-FUN#reglas",
+        "SRC-CA#ca-01-registrar-y-recuperar-un-comentario-anclado-rf-01"
+      ],
+      "invalid_citations": []
+    },
+    {
+      "id": "RAG-3",
+      "question": "¿Cuál es el tiempo máximo de respuesta exigido para registrar un comentario?",
+      "text": "Los fragmentos proporcionados describen los datos necesarios (texto, revisión de puntos) y las reglas para registrar un comentario anclado a una región [SRC-FUN#datos-del-comentario], pero no especifican ningún tiempo máximo exigido para esta acción. La única restricción temporal mencionada es que el sistema solo acepta comentarios si la ronda está abierta en ese momento [SRC-FUN#reglas]. Por lo tanto, no se puede determinar un límite de tiempo específico desde los datos disponibles.",
+      "hits": [
+        {
+          "chunk_id": "SRC-FUN#inicio",
+          "heading_path": "Funcionalidad: registrar un comentario anclado a una región",
+          "source_id": "SRC-FUN",
+          "source_path": "docs/requirements/funcionalidad.md",
+          "source_commit": "b48c41e64ecd02e0f2a81966612d53757e456a37",
+          "text": "Funcionalidad: registrar un comentario anclado a una región\nPrototipo. Base: blueprint del proyecto (marcado, comentario, rondas, versiones).",
+          "rrf_score": 0.031754032258064516,
+          "bm25": 5.2192730371536395,
+          "cosine": 0.7116853594779968
+        },
+        {
+          "chunk_id": "SRC-FUN#datos-del-comentario",
+          "heading_path": "Funcionalidad: registrar un comentario anclado a una región › Datos del comentario",
+          "source_id": "SRC-FUN",
+          "source_path": "docs/requirements/funcionalidad.md",
+          "source_commit": "b48c41e64ecd02e0f2a81966612d53757e456a37",
+          "text": "Funcionalidad: registrar un comentario anclado a una región › Datos del comentario\nRonda, ítem y versión, caja (x, y, ancho, alto), texto, nombre del revisor.",
+          "rrf_score": 0.03125763125763126,
+          "bm25": 4.876204469329808,
+          "cosine": 0.7166904807090759
+        },
+        {
+          "chunk_id": "SRC-FUN#alcance",
+          "heading_path": "Funcionalidad: registrar un comentario anclado a una región › Alcance",
+          "source_id": "SRC-FUN",
+          "source_path": "docs/requirements/funcionalidad.md",
+          "source_commit": "b48c41e64ecd02e0f2a81966612d53757e456a37",
+          "text": "Funcionalidad: registrar un comentario anclado a una región › Alcance\nEl sistema recibe los puntos del trazo del revisor sobre un ítem (imagen), calcula la caja delimitadora y guarda el comentario con su región, su versión y su ronda. El comentario se puede recuperar. El revisor puede cerrar la ronda.",
+          "rrf_score": 0.031099324975891997,
+          "bm25": 4.500562419934295,
+          "cosine": 0.727489173412323
+        },
+        {
+          "chunk_id": "SRC-FUN#reglas",
+          "heading_path": "Funcionalidad: registrar un comentario anclado a una región › Reglas",
+          "source_id": "SRC-FUN",
+          "source_path": "docs/requirements/funcionalidad.md",
+          "source_commit": "b48c41e64ecd02e0f2a81966612d53757e456a37",
+          "text": "Funcionalidad: registrar un comentario anclado a una región › Reglas\n- Solo se aceptan comentarios en una ronda abierta; si está cerrada se rechaza y no se guarda nada.\n- La caja se calcula como el rectángulo mínimo que contiene los puntos del trazo y se recorta a las dimensiones del ítem.\n- El comentario queda asociado a la versión del ítem y a la ronda.\n- El comentario requiere texto.\n- Cerrar una ronda ya cerrada no cambia nada.",
+          "rrf_score": 0.0304147465437788,
+          "bm25": 3.6785463512049903,
+          "cosine": 0.7191218137741089
+        }
+      ],
+      "sufficient": true,
+      "max_cosine": 0.727489173412323,
+      "cited": [
+        "SRC-FUN#datos-del-comentario",
+        "SRC-FUN#reglas"
+      ],
+      "invalid_citations": []
+    }
+  ]
+}
