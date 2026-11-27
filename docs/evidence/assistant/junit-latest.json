@@ -1,0 +1,7 @@
+{
+  "commit": "51c4e56bf30b24a83243a61c578a0709fe8c79a6",
+  "feature_commit": "cec82ef41d11fe2f21295da02bea1d1885b4d4ff",
+  "date": "2026-11-27T14:12:37+00:00",
+  "command": "uv run pytest tests/unit tests/integration tests/failure tests/contract --junitxml=docs/evidence/assistant/junit-latest.xml",
+  "exit_code": 0
+}
