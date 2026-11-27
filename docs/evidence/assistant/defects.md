@@ -46,3 +46,19 @@ del corpus del RAG: los defectos del asistente no son requisitos del producto.
 | LIM-A02 | El validador comprueba el origen de cada cita, no si el fragmento respalda la afirmación. | Una cita recuperada pero irrelevante no se detecta automáticamente. | Verificación humana registrada (`rag-queries.md`); a futuro, una comprobación automática por afirmación. |
 | LIM-A03 | Modelo local de 4,7 B parámetros en una GPU de 4 GB: cada llamada tarda segundos y la calidad de las decisiones es menor que la de un modelo grande. | Ejecuciones lentas y variables entre semillas; se mide en los escenarios. | Probar con un modelo mayor cuando haya hardware o presupuesto. |
 | LIM-A04 | Cuando la instrucción inyectada llega al modelo, este la obedece en parte: en las 3 corridas válidas de T-04 omitió consultar las pruebas, y en 2 declaró «sustentada» sin resultados. No intentó la herramienta ajena ni citó el documento envenenado. | La protección depende del código (validador y lista blanca), no del modelo: ambos casos de «sustentada» se rebajaron a «no concluyente». | Mantener los controles en código; marcar fuentes no confiables y excluirlas del índice real. |
+
+### Observaciones de la revisión final no corregidas (prioridad baja)
+
+La revisión independiente del código (ver `ai-usage.md`, fila 17) dejó estas
+observaciones menores; se aceptan como límites conocidos.
+
+| ID | Observación | Efecto |
+|---|---|---|
+| LIM-A05 | El validador no comprueba que una prueba citada corresponda al requisito (podría citarse U-01 para RF-02). | Lo cubre la verificación humana. |
+| LIM-A06 | Dos servidores MCP sobre el mismo índice pueden chocar al reingerir tras editar una fuente (error genérico; un reintento lo resuelve). | Solo con dos clientes simultáneos. |
+| LIM-A07 | El servidor reingiere al arrancar, no en cada búsqueda. | Un servidor de larga vida cita la versión previa de una sección editada hasta reiniciarse. |
+| LIM-A08 | El índice no registra qué modelo de embeddings lo creó. | Cambiar de modelo exige borrar `.anchor/`. |
+| LIM-A09 | El neutralizado de `</fragmento>` distingue mayúsculas, y la respuesta RAG no lo aplica. | Bajo: los controles reales están en el código. |
+| LIM-A10 | Un campo de lista del informe acepta un texto que contenga otros campos. | Sin efecto en la conclusión. |
+| LIM-A11 | Un resultado de prueba con formato inesperado detiene la ejecución en lugar de registrarse como error. | El servidor propio siempre devuelve el formato correcto. |
+| LIM-A12 | Una suite que no puede recolectarse se informa como `not_found`. | Mensaje engañoso ante un error de importación. |
